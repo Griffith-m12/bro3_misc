@@ -14,10 +14,13 @@
 // @include        http://*.3gokushi.jp/message/inbox.php*
 // @description    雑多な改善(同盟ログ検索機能, トレード, 半自動チュートリアル, 自動ブショーダス(自動削除付), 自動ヨロズダス, 武将図鑑未取得カードのトレードリンク, トレード関連書簡自動開封削除, クエスト, 出兵予約時刻) by いかりや長介@ドリフ
 // @require		   http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js
-// @version		   0.4.6.a
+// @version		   0.4.6.a3
 // ==/UserScript==
 
 //2012/07/14 URを削除しないようにしたつもり・・・・　変更点　AC
+//2012/07/24 水鏡を削除しないようにしたつもり・・・　変更点　AC1
+//2012/08/24 雑多な改善・・・変更点　ac.3
+
 
 jQuery.noConflict();
 j$ = jQuery;
@@ -662,8 +665,8 @@ MARGIN = 2500;
         j$("#busyodasTabContent:has(img[src*=hd_lite.jpg]) table").before("<div id=AutoBushodasLite>");
         j$("#AutoBushodasLite").append("<div id=AutoBushodasControls>");
         j$("#AutoBushodasLite").append("<div id=CardInfo>");
-        j$("#AutoBushodasControls").append("<div id=notice_msg>※自動破棄を有効にしても<span class=Rarity_SR>SR</span>, <span class=Rarity_R>R</span>及び優良<span class=Rarity_UC>UC</span>(コスト3/自動スキル/劉備/孫権/諸葛亮/徐庶)は破棄対象外</div>");
-        j$("#AutoBushodasControls").append("<div id=first_line_wrap><div id=delete_enabler title=R以上及び優良UC(コスト3/自動スキル/劉備/孫権/諸葛亮/徐庶)を除外><input type=checkbox id=auto_delete>自動破棄を有効にする</div><div id=save_btn><input type=button id=save_settings value=設定保存></div><div id=draw_btn><input type=button id=AutoDrawBushodas value=自動ブショーダス></div></div>");
+        j$("#AutoBushodasControls").append("<div id=notice_msg>※自動破棄を有効にしても<span class=Rarity_UR>UR</span>, <span class=Rarity_SR>SR</span>, <span class=Rarity_R>R</span>及び優良<span class=Rarity_UC>UC</span>(コスト3/自動スキル/劉備/孫権/諸葛亮/徐庶/水鏡)は破棄対象外</div>");　//ac1
+        j$("#AutoBushodasControls").append("<div id=first_line_wrap><div id=delete_enabler title=R以上及び優良UC(コスト3/自動スキル/劉備/孫権/諸葛亮/徐庶/水鏡)を除外><input type=checkbox id=auto_delete>自動破棄を有効にする</div><div id=save_btn><input type=button id=save_settings value=設定保存></div><div id=draw_btn><input type=button id=AutoDrawBushodas value=自動ブショーダス></div></div>");//ac1
         j$("#AutoBushodasControls").append("<div class=except_list>破棄除外(スキル付与素材)</div>");
         j$("#AutoBushodasControls").append("<ul>");
         j$("#AutoBushodasControls").append("<li class=keep_skill title=騎兵強行スキルを除外><input type=checkbox id=except_hero>一騎当千</li>");
@@ -733,6 +736,10 @@ MARGIN = 2500;
             "margin-right": "5px",
             "margin-bottom": "10px",
             "width": "140px"
+        });
+        j$(".Rarity_UR").css({　//ac.3
+            "color": "#ff33ff",  //ac.3
+            "font-weight": "bold"  //ac.3
         });
         j$(".Rarity_SR").css({
             "color": "#ff4242",
@@ -1032,11 +1039,11 @@ function AutoBushodas(o, p, q) {
         if (GM_getValue(KEY + "AutoDelete", false) == true) {
             k = a;
             j = " を自動削除しました!";
-            if (c == "R" || c == "SR" || c == "UR" || e >= 3.0 || g == true || b == "1007" || b == "1009" || b == "1014" || b == "3008") { //AC
+            if (c == "R" || c == "SR" || c == "UR" || e >= 3.0 || g == true || b == "1007" || b == "1009" || b == "1014" || b == "4082" || b == "3008") { //AC+ac1
                 k = "0";
                 j = " が当たりました!"
             }
-            if ((GM_getValue(KEY + "Keep_Hero", false) && h == "騎兵強行") || (GM_getValue(KEY + "Keep_Spear", false) && h == "槍兵突撃") || (GM_getValue(KEY + "Keep_Spear", false) && h == "槍兵強行") || (GM_getValue(KEY + "Keep_Cavalry", false) && h == "騎兵突撃") || (GM_getValue(KEY + "Keep_Cavalry", false) && h == "騎兵の強撃") || (GM_getValue(KEY + "Keep_Bow", false) && h == "弓兵突撃") || (GM_getValue(KEY + "Keep_Bow", false) && h == "弓兵の強撃") || (GM_getValue(KEY + "Keep_Ram", false) && h == "兵器の強撃") || (GM_getValue(KEY + "Keep_Courage", false) && h == "鉄壁") || (GM_getValue(KEY + "Keep_Thousand_Miles", false) && h == "急速援護") || (GM_getValue(KEY + "Keep_Intelligence", false) && f >= 15.0) || (GM_getValue(KEY + "Keep_Cost_C", false) && e >= 2.5) || (GM_getValue(KEY + "Keep_Cost_UC", false) && e >= 2.5 && c == "UC") || (GM_getValue(KEY + "Keep_Spear", false) && h == "槍兵の強撃")) {
+            if ((GM_getValue(KEY + "Keep_Hero", false) && h == "騎兵強行") || (GM_getValue(KEY + "Keep_Spear", false) && h == "槍兵突撃")|| (GM_getValue(KEY + "Keep_Spear", false) && h == "槍兵強行") || (GM_getValue(KEY + "Keep_Cavalry", false) && h == "騎兵突撃") || (GM_getValue(KEY + "Keep_Cavalry", false) && h == "騎兵の強撃") || (GM_getValue(KEY + "Keep_Bow", false) && h == "弓兵突撃") || (GM_getValue(KEY + "Keep_Bow", false) && h == "弓兵の強撃") || (GM_getValue(KEY + "Keep_Ram", false) && h == "兵器の強撃") || (GM_getValue(KEY + "Keep_Courage", false) && h == "鉄壁") || (GM_getValue(KEY + "Keep_Thousand_Miles", false) && h == "急速援護") || (GM_getValue(KEY + "Keep_Intelligence", false) && f >= 15.0) || (GM_getValue(KEY + "Keep_Cost_C", false) && e >= 2.5) || (GM_getValue(KEY + "Keep_Cost_UC", false) && e >= 2.5 && c == "UC") || (GM_getValue(KEY + "Keep_Spear", false) && h == "槍兵の強撃")) {
                 k = "0";
                 j = " が当たりました!"
             }
