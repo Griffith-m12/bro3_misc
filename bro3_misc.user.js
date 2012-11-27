@@ -496,18 +496,36 @@ MARGIN = 2500;
         l["拠点をつくれ！ 其三"] = "TP 300";
         l["拠点をつくれ！ 其四"] = "TP 500";
         l["拠点をつくれ！ 其五"] = "TP 700";
+        l["倉庫の上限を増やそう　其一"] = "木石鉄糧 500";
+        l["倉庫の上限を増やそう　其二"] = "TP+100";
+        l["倉庫の上限を増やそう　其三"] = "小麗チケット 1枚";
+        l["倉庫の上限を増やそう　其四"] = "小麗チケット 2 枚";
+        l["倉庫の上限を増やそう　其五"] = "大鳳チケット 1 枚";
+
         j$("a[href*=/quest/index.php?disp_id]").each(function () {
             if (j$(this).text() in l) {
                 var a = l[j$(this).text()];
+                a = a.replace("小麗チケット", "<img src=/20120416-01/extend_project/w945/img/busyodas/img_rate_syourei.jpg height=48px style=display:block;/>小麗チケット");
+                a = a.replace("大鳳チケット", "<img src=/20120416-01/extend_project/w945/img/busyodas/img_rate_taihoh.jpg height=48px style=display:block;/>大鳳チケット");
                 a = a.replace("木", "<img src=" + j$("img[src*=ico_wood.gif]:first").attr("src") + " />");
                 a = a.replace("石", "<img src=" + j$("img[src*=ico_stone.gif]:first").attr("src") + " />");
                 a = a.replace("鉄", "<img src=" + j$("img[src*=ico_ingot.gif]:first").attr("src") + " />");
                 a = a.replace("糧", "<img src=" + j$("img[src*=ico_grain.gif]:first").attr("src") + " />");
                 a = a.replace("名声", "<img src=" + j$("img[src*=ico_fame.gif]:first").attr("src") + " />");
-                a = a.replace("BP", "<img src=" + j$("img[src*=icon_header_bp.gif]:first").attr("src") + " />");
+                a = a.replace("シルバーチケット", "<img src=/20111003-04/extend_project/w760/img/busyodas/img_rate_silver_ex.jpg height=48px />");
+
+                var ifmixi = document.evaluate('//*[@id="supportNavi"]', document, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+                if ( ifmixi.snapshotLength ){
+    			a = a.replace("BP", "<img src=" + j$("img[src*=icon_header_bp.gif]:first").attr("src") + " />");
                 a = a.replace("TP", "<img src=" + j$("img[src*=icon_header_tp.gif]:first").attr("src") + " />");
                 a = a.replace("CP", "<img src=" + j$("img[src*=icon_header_cp.gif]:first").attr("src") + " />");
                 a = a.replace("シルバーチケット", "<img src=/20111003-04/extend_project/w760/img/busyodas/img_rate_silver_ex.jpg height=48px />");
+                }else{
+            	a = a.replace("BP", "<img src=" + j$("img[src*=icon_bp.gif]:first").attr("src") + " />");
+                a = a.replace("TP", "<img src=" + j$("img[src*=icon_tp.gif]:first").attr("src") + " />");
+                a = a.replace("CP", "<img src=" + j$("img[src*=icon_cp.gif]:first").attr("src") + " />");
+                }
+
                 var b = a.match(/ (\d\d\d\d+)/g);
                 if (b) {
                     for (var i = 0; i < b.length; i++) {
