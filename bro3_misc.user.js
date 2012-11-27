@@ -1055,7 +1055,7 @@ function AutoBushodas(o, p, q) {
                 }
             }
         }
-        j$("#CardInfo").html("<span id=card_rarity>" + c + "</span>  " + d + " (No." + b + ")<span id=result_msg>" + j + "</span>");
+        j$("#CardInfo").html("<span id=card_rarity>" + c + "</span>  " + d + " (No." + b + ")" + h + "<span id=result_msg>" + j + "</span>");
         if (c == "C") {
             j$("#card_rarity").css({
                 "color": "black",
