@@ -12,8 +12,16 @@
 // @include        http://*.3gokushi.jp/busyodas/b3kuji.php*
 // @include        http://*.3gokushi.jp/alliance/alliance_log.php*
 // @include        http://*.3gokushi.jp/message/inbox.php*
+// @include        http://*.sangokushi.in.th/card/trade.php*
+// @include        http://*.sangokushi.in.th/card/busyobook_picture.php*
+// @include        http://*.sangokushi.in.th/busyodas/b3kuji.php*
+// @include        http://*.sangokushi.in.th/busyodas/busyodas.php*
+// @include        http://*.bbsr-maql.jp/card/trade.php*
+// @include        http://*.bbsr-maql.jp/card/busyobook_picture.php*
+// @include        http://*.bbsr-maql.jp/busyodas/b3kuji.php*
+// @include        http://*.bbsr-maql.jp/busyodas/busyodas.php*
 // @description    雑多な改善(同盟ログ検索機能, トレード, 半自動チュートリアル, 自動ブショーダス(自動削除付), 自動ヨロズダス, 武将図鑑未取得カードのトレードリンク, トレード関連書簡自動開封削除, クエスト, 出兵予約時刻) by いかりや長介@ドリフ
-// @require		   http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js
+// @require		   http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js
 // @version		   0.4.6.a3
 // ==/UserScript==
 
@@ -21,16 +29,20 @@
 //2012/07/24 水鏡を削除しないようにしたつもり・・・　変更点　AC1
 //2012/08/24 雑多な改善・・・変更点　ac.3
 
+var debug_log = function(msg) { console.log(GM_info.script.name + ':' + location.host + ':' + msg); };
 
 jQuery.noConflict();
 j$ = jQuery;
 HOST = location.hostname;
 KEY = "BRO3MISC_" + HOST + "_";
 MARGIN = 2500;
+
 (function () {
     if (j$("#container").length == 0) {
         return
     }
+try{
+    debug_log('Enter')
     if (j$("#AjaxTempDOM").length != 0) {
         j$("#AjaxTempDOM").empty()
     }
@@ -662,7 +674,13 @@ MARGIN = 2500;
         var q = parseInt(j$("li[class=first_bpbtn] span").text());
         j$("div[class=sysMes]").text().match(/残り(\d+)枚/);
         var r = parseInt(RegExp.$1);
-        j$("#busyodasTabContent:has(img[src*=hd_lite.jpg]) table").before("<div id=AutoBushodasLite>");
+        if(j$("#busyodasTabContent:has(img[src*='hd_lite.jpg']) table").length != 0) {
+          j$("#busyodasTabContent:has(img[src*='hd_lite.jpg']) table").before("<div id=AutoBushodasLite>");
+        } else if(j$("table#get_link").length != 0){
+          j$("table#get_link").before("<div id=AutoBushodasLite>");
+        } else {
+          j$("DIV#busyodasTabContent.clearfix").insert("<div id=AutoBushodasLite>");
+        }
         j$("#AutoBushodasLite").append("<div id=AutoBushodasControls>");
         j$("#AutoBushodasLite").append("<div id=CardInfo>");
         j$("#AutoBushodasControls").append("<div id=notice_msg>※自動破棄を有効にしても<span class=Rarity_UR>UR</span>, <span class=Rarity_SR>SR</span>, <span class=Rarity_R>R</span>及び優良<span class=Rarity_UC>UC</span>(コスト3/自動スキル/劉備/孫権/諸葛亮/徐庶/水鏡)は破棄対象外</div>");　//ac1
@@ -873,6 +891,10 @@ MARGIN = 2500;
             DeleteMsgs(t, new Array())
         })
     }
+} catch(e) {
+    debug_log('ERROR:' + e);
+}
+    debug_log('Quit.')
 })();
 
 function BuildFacility(e) {
@@ -996,7 +1018,13 @@ function AutoBushodas(o, p, q) {
     } else {
         r = parseInt(o / 100)
     }
-    j$("input[name=送信]").attr("onClick").split(",")[2].match(/\'([a-z0-9]+)\'/);
+    if(j$("input.commentSend").length != 0){
+      j$("input.commentSend").attr("onClick").split(",")[2].match(/\'([a-z0-9]+)\'/);
+    } else if(j$("#commentsendbtn").length != 0){
+      j$("#commentsendbtn").attr("onClick").split(",")[2].match(/\'([a-z0-9]+)\'/);
+    } else {
+      return;
+    }
     var s = RegExp.$1;
     if (r == 0) {
         if (q != 0) {
@@ -1024,14 +1052,22 @@ function AutoBushodas(o, p, q) {
     t['ssid'] = s;
     t['del_card_id'] = q;
     j$("#AjaxTempDOM").load("http://" + HOST + "/busyodas/busyodas.php #gray02Wrapper", t, function () {
-        j$("a[href*=BusyodasRetry]").attr("href").match(/\'(\d+)\'/);
-        var a = RegExp.$1;
-        var b = j$("span[class=cardno]").text();
+        var a = '';
+        if(j$("a[href*=BusyodasRetry]").length != 0){
+          j$("a[href*=BusyodasRetry]").attr("href").match(/\'(\d+)\'/);
+          a = RegExp.$1;
+        } else if(j$("form[name='label1'] input[name='card']").length != 0){
+          a = j$("form[name='label1'] input[name='card']").first().val();
+        } else {
+          return;
+        }
+        debug_log('AjaxTempDOM:' + a);
+        var b = j$("span.cardno").text();
         var c = j$("span[class*=rarerity]").text();
-        var d = j$("span[class=name]").text();
-        var e = parseFloat(j$("span[class=cost]").text());
-        var f = parseFloat(j$("span[class=status_int]").text());
-        var g = new Boolean(j$("span[class=skillName1 red]").length);
+        var d = j$("span.name").text();
+        var e = parseFloat(j$("span.cost").text());
+        var f = parseFloat(j$("span.status_int").text());
+        var g = new Boolean(j$("span.skillName1.red").length);
         j$("span[class*=skillName1]").text().match(/:(.+)LV/);
         var h = RegExp.$1;
         var j = " が当たりました!";
