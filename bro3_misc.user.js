@@ -35,6 +35,7 @@ jQuery.noConflict();
 j$ = jQuery;
 HOST = location.hostname;
 KEY = "BRO3MISC_" + HOST + "_";
+GLOBAL_KEY = "BRO3MISC__";
 MARGIN = 2500;
 
 (function () {
@@ -805,18 +806,18 @@ try{
         j$("#white_lists").val(p);
         j$("input[type=checkbox]:checked").parent().css("color", "orangered");
         j$("#save_settings").bind('click', function () {
-            GM_setValue(KEY + "AutoDelete", j$("#auto_delete").attr("checked"));
-            GM_setValue(KEY + "Keep_Hero", j$("#except_hero").attr("checked"));
-            GM_setValue(KEY + "Keep_Spear", j$("#except_spear").attr("checked"));
-            GM_setValue(KEY + "Keep_Cavalry", j$("#except_cavalry").attr("checked"));
-            GM_setValue(KEY + "Keep_Bow", j$("#except_bow").attr("checked"));
-            GM_setValue(KEY + "Keep_Ram", j$("#except_ram").attr("checked"));
-            GM_setValue(KEY + "Keep_Courage", j$("#except_courage").attr("checked"));
-            GM_setValue(KEY + "Keep_Thousand_Miles", j$("#except_thousand_miles_run").attr("checked"));
-            GM_setValue(KEY + "Keep_Intelligence", j$("#except_intelli_15").attr("checked"));
-            GM_setValue(KEY + "Keep_Cost_UC", j$("#except_cost_25_UC").attr("checked"));
-            GM_setValue(KEY + "Keep_Cost_C", j$("#except_cost_25_C").attr("checked"));
+            GM_setValue(KEY + "AutoDelete", j$("#auto_delete").attr("checked")||false);
             GM_setValue(KEY + "White_Lists", j$("#white_lists").attr("value"));
+            GM_setValue(KEY + "Keep_Hero", j$("#except_hero").attr("checked")||false);
+            GM_setValue(KEY + "Keep_Spear", j$("#except_spear").attr("checked")||false);
+            GM_setValue(KEY + "Keep_Cavalry", j$("#except_cavalry").attr("checked")||false);
+            GM_setValue(KEY + "Keep_Bow", j$("#except_bow").attr("checked")||false);
+            GM_setValue(KEY + "Keep_Ram", j$("#except_ram").attr("checked")||false);
+            GM_setValue(KEY + "Keep_Courage", j$("#except_courage").attr("checked")||false);
+            GM_setValue(KEY + "Keep_Thousand_Miles", j$("#except_thousand_miles_run").attr("checked")||false);
+            GM_setValue(KEY + "Keep_Intelligence", j$("#except_intelli_15").attr("checked")||false);
+            GM_setValue(KEY + "Keep_Cost_UC", j$("#except_cost_25_UC").attr("checked")||false);
+            GM_setValue(KEY + "Keep_Cost_C", j$("#except_cost_25_C").attr("checked")||false);
             alert("設定保存しました")
         });
         j$("#auto_delete").bind('click', function () {
@@ -1072,7 +1073,8 @@ function AutoBushodas(o, p, q) {
         var h = RegExp.$1;
         var j = " が当たりました!";
         var k = "0";
-        if (GM_getValue(KEY + "AutoDelete", false) == true) {
+        // debug_log('getValue:' + JSON.stringify(GM_getValue(KEY + "AutoDelete", false)))
+        if (GM_getValue(KEY + "AutoDelete", false) != false) {
             k = a;
             j = " を自動削除しました!";
             if (c == "R" || c == "SR" || c == "UR" || e >= 3.0 || g == true || b == "1007" || b == "1009" || b == "1014" || b == "4082" || b == "3008") { //AC+ac1
