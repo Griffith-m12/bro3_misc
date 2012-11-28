@@ -1085,20 +1085,29 @@ function AutoBushodas(o, p, q) {
     t['got_type'] = "0";
     t['send'] = "send";
     t['ssid'] = s;
+    t['csrf_token'] = s;
     t['del_card_id'] = q;
-    j$("#AjaxTempDOM").load("http://" + HOST + "/busyodas/busyodas.php #gray02Wrapper", t, function () {
+    var callbackBushodas = function () {
         var a = '';
         if(j$("a[href*=BusyodasRetry]").length != 0){
           j$("a[href*=BusyodasRetry]").attr("href").match(/\'(\d+)\'/);
           a = RegExp.$1;
         } else if(j$("form[name='label1'] input[name='card']").length != 0){
           a = j$("form[name='label1'] input[name='card']").first().val();
+        } else if(j$("a[onclick*='BusyodasRetry']").length != 0) {
+          j$("a[onclick*='BusyodasRetry']").attr('onclick').split(",")[2].match(/\'([a-z0-9]+)\'/);
+          a = RegExp.$1;
         } else {
           return;
         }
         debug_log('AjaxTempDOM:' + a);
-        var b = j$("span.cardno").text();
+        var b = j$("span.cardno").text() || j$("span.gear_cardno").text();
         var c = j$("span[class*=rarerity]").text();
+        if(!c){
+          j$("div.card.[class*='rarerity_']").attr('class').match(/_([^_ ]+)/)
+          c = RegExp.$1.toUpperCase();
+        }
+        // <div class="clearfix cutin_bg" id="cutin_bg_r" onclick="window.location='./busyodas_result.php?card=579736&got_type=0'">
         var d = j$("span.name").text();
         var e = parseFloat(j$("span.cost").text());
         var f = parseFloat(j$("span.status_int").text());
@@ -1174,7 +1183,9 @@ function AutoBushodas(o, p, q) {
         setTimeout(function () {
             AutoBushodas(o - m, p - n, k)
         }, u)
-    })
+    }
+
+    j$("#AjaxTempDOM").load("http://" + HOST + "/busyodas/busyodas.php #gray02Wrapper", t, callbackBushodas);
 }
 function AutoYorozudas(b) {
     j$(document.body).append("<div id=AjaxTempDOM>");
@@ -1191,9 +1202,10 @@ function AutoYorozudas(b) {
     c['got_type'] = "0";
     c['send'] = "send";
     j$("#AjaxTempDOM").load(j$('form').attr('action') + " #gray02Wrapper", c, function () {
-        if (j$("p:contains(おめでとうございます！)").length != 0) {
-            j$("p:contains(おめでとうございます！)").html().match(/<strong>(.+)&nbsp;/);
-            var a = "<strong>" + RegExp.$1 + "</strong>";
+        if (j$("p:contains('が当たりました')").length != 0) {
+            //j$("p:contains('が当たりました')").html().match(/<strong>(.+)&nbsp;/);
+            //var a = "<strong>" + RegExp.$1 + "</strong>";
+            var a = j$("p:contains('が当たりました') strong").text().replace("\xA0", '', 'g');
             j$("#DrawResult").html(a + "が当たりました!")
         } else {
             j$("#DrawResult").html("<strong>はずれ</strong>を引いてしまいました")
