@@ -34,8 +34,22 @@
 //2012/11/28 タイ語版ブラ三でもAutoBushodasLite -- griffith
 // require        http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js
 
-//var debug_log = function(msg) { console.log(GM_info.script.name + ':' + location.host + ':' + msg); };
-var debug_log = function(msg) { console.log('bro3_misc:' + location.host + ':' + msg); };
+var logtitle = 'bro3_misc';
+
+if(typeof GM_getMetadata != 'undefined') {
+	if(typeof GM_getMetadata('name') != 'undefined') {
+		logtitle = GM_getMetadata('name');
+		if(typeof logtitle != 'string') { logtitle = logtitle[0]; }
+	}
+} else
+if(typeof GM_info != 'undefined') {
+	if(typeof GM_info.script != 'undefined') {
+		logtitle = GM_info.script.name;
+	}
+}
+
+logtitle = logtitle.toLowerCase();
+var debug_log = function(msg) { console.log(logtitle + ':' + location.host + ':' + msg); };
 
 jQuery.noConflict();
 j$ = jQuery;
@@ -716,6 +730,7 @@ try{
         j$("#AutoBushodasControls").append("<li class=keep_skill title=知力15以上を除外><input type=checkbox id=except_intelli_15>知力15以上</li>");
         j$("#AutoBushodasControls").append("<li class=keep_skill title=コスト2.5 UCを除外><input type=checkbox id=except_cost_25_UC>コスト2.5 <span class=Rarity_UC>UC</span></li>");
         j$("#AutoBushodasControls").append("<li class=keep_skill title=コスト2.5 UC/Cを除外><input type=checkbox id=except_cost_25_C>コスト2.5 <span class=Rarity_UC>UC</span><span class=Rarity_C>/C</span></li>");
+        j$("#AutoBushodasControls").append("<li class=keep_skill title=C以外全部除外><input type=checkbox id=except_above_C><span class=Rarity_C>C</span>以外全部除外</li>");
         j$("#AutoBushodasControls").append("</ul>");
         j$("#AutoBushodasControls").append("<div class=except_list>破棄除外(ホワイトリスト) [カードIDを半角かつカンマ区切りで入力]</div>");
         j$("#AutoBushodasControls").append("<div style=clear:both><input type=text id=white_lists size=78></div>");
@@ -817,6 +832,8 @@ try{
         j$("#except_cost_25_UC").attr("checked", p);
         p = GM_getValue(KEY + "Keep_Cost_C", false);
         j$("#except_cost_25_C").attr("checked", p);
+        p = GM_getValue(KEY + "Keep_Above_C", false);
+        j$("#except_above_C").attr("checked", p);
         p = GM_getValue(KEY + "White_Lists", "");
         j$("#white_lists").val(p);
         j$("input[type=checkbox]:checked").parent().css("color", "orangered");
@@ -833,6 +850,7 @@ try{
             GM_setValue(KEY + "Keep_Intelligence", j$("#except_intelli_15").attr("checked")||false);
             GM_setValue(KEY + "Keep_Cost_UC", j$("#except_cost_25_UC").attr("checked")||false);
             GM_setValue(KEY + "Keep_Cost_C", j$("#except_cost_25_C").attr("checked")||false);
+            GM_setValue(KEY + "Keep_Above_C", j$("#except_above_C").attr("checked")||false);
             alert("設定保存しました")
         });
         j$("#auto_delete").bind('click', function () {
@@ -1097,7 +1115,7 @@ function AutoBushodas(o, p, q) {
                 k = "0";
                 j = " が当たりました!"
             }
-            if ((GM_getValue(KEY + "Keep_Hero", false) && h == "騎兵強行") || (GM_getValue(KEY + "Keep_Spear", false) && h == "槍兵突撃")|| (GM_getValue(KEY + "Keep_Spear", false) && h == "槍兵強行") || (GM_getValue(KEY + "Keep_Cavalry", false) && h == "騎兵突撃") || (GM_getValue(KEY + "Keep_Cavalry", false) && h == "騎兵の強撃") || (GM_getValue(KEY + "Keep_Bow", false) && h == "弓兵突撃") || (GM_getValue(KEY + "Keep_Bow", false) && h == "弓兵の強撃") || (GM_getValue(KEY + "Keep_Ram", false) && h == "兵器の強撃") || (GM_getValue(KEY + "Keep_Courage", false) && h == "鉄壁") || (GM_getValue(KEY + "Keep_Thousand_Miles", false) && h == "急速援護") || (GM_getValue(KEY + "Keep_Intelligence", false) && f >= 15.0) || (GM_getValue(KEY + "Keep_Cost_C", false) && e >= 2.5) || (GM_getValue(KEY + "Keep_Cost_UC", false) && e >= 2.5 && c == "UC") || (GM_getValue(KEY + "Keep_Spear", false) && h == "槍兵の強撃")) {
+            if ((GM_getValue(KEY + "Keep_Hero", false) && h == "騎兵強行") || (GM_getValue(KEY + "Keep_Spear", false) && h == "槍兵突撃")|| (GM_getValue(KEY + "Keep_Spear", false) && h == "槍兵強行") || (GM_getValue(KEY + "Keep_Cavalry", false) && h == "騎兵突撃") || (GM_getValue(KEY + "Keep_Cavalry", false) && h == "騎兵の強撃") || (GM_getValue(KEY + "Keep_Bow", false) && h == "弓兵突撃") || (GM_getValue(KEY + "Keep_Bow", false) && h == "弓兵の強撃") || (GM_getValue(KEY + "Keep_Ram", false) && h == "兵器の強撃") || (GM_getValue(KEY + "Keep_Courage", false) && h == "鉄壁") || (GM_getValue(KEY + "Keep_Thousand_Miles", false) && h == "急速援護") || (GM_getValue(KEY + "Keep_Intelligence", false) && f >= 15.0) || (GM_getValue(KEY + "Keep_Cost_C", false) && e >= 2.5) || (GM_getValue(KEY + "Keep_Cost_UC", false) && e >= 2.5 && c == "UC")  || (GM_getValue(KEY + "Keep_Above_C", false) && c != "C") || (GM_getValue(KEY + "Keep_Spear", false) && h == "槍兵の強撃")) {
                 k = "0";
                 j = " が当たりました!"
             }
