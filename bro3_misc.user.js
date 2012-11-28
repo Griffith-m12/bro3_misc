@@ -10,6 +10,7 @@
 // @include        http://*.3gokushi.jp/card/busyobook_picture.php*
 // @include        http://*.3gokushi.jp/busyodas/busyodas.php*
 // @include        http://*.3gokushi.jp/busyodas/b3kuji.php*
+// @include        http://*.3gokushi.jp/reward_vendor/reward_vendor.php*
 // @include        http://*.3gokushi.jp/alliance/alliance_log.php*
 // @include        http://*.3gokushi.jp/message/inbox.php*
 // @include        http://*.sangokushi.in.th/card/trade.php*
@@ -21,15 +22,20 @@
 // @include        http://*.bbsr-maql.jp/busyodas/b3kuji.php*
 // @include        http://*.bbsr-maql.jp/busyodas/busyodas.php*
 // @description    雑多な改善(同盟ログ検索機能, トレード, 半自動チュートリアル, 自動ブショーダス(自動削除付), 自動ヨロズダス, 武将図鑑未取得カードのトレードリンク, トレード関連書簡自動開封削除, クエスト, 出兵予約時刻) by いかりや長介@ドリフ
-// @require		   http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js
-// @version		   0.4.6.a3
+// @require        http://code.jquery.com/jquery.min.js
+// @version        0.4.6.a3
 // ==/UserScript==
 
 //2012/07/14 URを削除しないようにしたつもり・・・・　変更点　AC
 //2012/07/24 水鏡を削除しないようにしたつもり・・・　変更点　AC1
 //2012/08/24 雑多な改善・・・変更点　ac.3
+//2012/11/28 FIX:checkbox.attr('checked') 返り値がBooleanではなく文字列('checked','yes','true'など)にも対応 -- griffith
+//2012/11/28 BASARAでも画面が出るように(但しAutoBushodasLiteは不能) -- griffith
+//2012/11/28 タイ語版ブラ三でもAutoBushodasLite -- griffith
+// require        http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js
 
-var debug_log = function(msg) { console.log(GM_info.script.name + ':' + location.host + ':' + msg); };
+//var debug_log = function(msg) { console.log(GM_info.script.name + ':' + location.host + ':' + msg); };
+var debug_log = function(msg) { console.log('bro3_misc:' + location.host + ':' + msg); };
 
 jQuery.noConflict();
 j$ = jQuery;
@@ -39,16 +45,17 @@ GLOBAL_KEY = "BRO3MISC__";
 MARGIN = 2500;
 
 (function () {
+    debug_log('Enter')
     if (j$("#container").length == 0) {
         return
     }
 try{
-    debug_log('Enter')
     if (j$("#AjaxTempDOM").length != 0) {
         j$("#AjaxTempDOM").empty()
     }
     if (location.pathname == "/alliance/alliance_log.php") {
-        j$("table[class=commonTables tables]").before("<div id=log_search><div id=search_controls></div></div><div id=search_header></div><div id=search_result_area></div>");
+        debug_log('同盟ログ検索');
+        j$("table.commonTables.tables").before("<div id=log_search><div id=search_controls></div></div><div id=search_header></div><div id=search_result_area></div>");
         j$("#search_controls").append("<div id=query_field><input type=text id=search_query /> <input type=button id=do_search value=検索><input type=hidden id=total_counts value=0></div>");
         j$("#search_controls").append("<div id=date_field>検索期間 : <select id=from_y></select>年<select id=from_m></select>月<select id=from_d></select>日 <select id=from_h></select>時 ～ <select id=to_y></select>年<select id=to_m></select>月<select id=to_d></select>日 <select id=to_h></select>時</div>");
         j$("#log_search").css({
@@ -73,6 +80,7 @@ try{
             j$("#search_controls").show()
         } else {
             j$("#search_controls").hide();
+            debug_log('同盟ログ検索 not m')
             return
         }
         var f = new Date();
@@ -117,6 +125,7 @@ try{
         })
     }
     if (location.pathname.match(/\/tutorial\//)) {
+        debug_log('チュートリアル補助機能');
         j$("p[align=center]").append("<div id=AutoTutorialMsg>");
         if (j$("a[href=/tutorial/index.php?st=1]").length != 0) {
             alert("「領地の取り方」 及び 「武将のレベルアップ」以外は操作しないで下さい.\n操作した場合は当該チュートリアルを手動で行うか, チュートリアルタブを再度クリックする必要があります.\n状況確認等は新しいウインドウを作成して行って下さい.");
@@ -567,13 +576,15 @@ try{
         }
     }
     if (location.pathname == "/card/trade.php") {
-        j$("a[href*=trade_bid.php]").click(function () {
+        debug_log('トレード補助機能');
+        if(j$('div>span.notice').length != 0) { return false; }
+        j$("a[href*='trade_bid.php']").click(function () {
             window.open(this.href, '_blank');
             return false
         });
         var m = "";
         var n = 0;
-        j$("div[class=ui-tabs-panel]").append("<div id=10tp_trade>");
+        j$("div.ui-tabs-panel").append("<div id=10tp_trade>");
         j$("#10tp_trade").css({
             "margin-top": "10px",
             "margin-bottom": "5px",
@@ -586,8 +597,8 @@ try{
             "text-align": "right"
         });
         j$("tr:has(strong:contains(10))").each(function () {
-            if (j$("td[class=limit]", this).text().trim() == "---" && parseInt(j$("strong", this).html().replace(",", "")) == 10) {
-                j$("a[href*=trade_bid.php]", this).attr("href").match(/id=(\d+)/);
+            if (j$("td.limit", this).text().trim() == "---" && parseInt(j$("strong", this).html().replace(",", "")) == 10) {
+                j$("a[href*='trade_bid.php']", this).attr("href").match(/id=(\d+)/);
                 var a = "http://" + HOST + "/card/trade_bid.php?id=" + RegExp.$1;
                 m += a + "\n";
                 n++
@@ -605,8 +616,9 @@ try{
         })
     }
     if (location.pathname == "/card/exhibit_list.php") {
+        debug_log('出品中カードへのダイレクトリンク');
         var m = "";
-        j$("div[class=trade_commission_info]").before("<div id=trade_direct_link>");
+        j$("div.trade_commission_info").before("<div id=trade_direct_link>");
         j$("#trade_direct_link").css({
             "margin-top": "10px",
             "margin-bottom": "5px",
@@ -614,7 +626,7 @@ try{
         });
         j$("#trade_direct_link").append("出品中カードへのダイレクトリンク");
         j$("#trade_direct_link").append("<textarea id=direct_link_lists rows=11 cols=93>");
-        j$("a[href*=exhibit_list.php?del_id]").each(function () {
+        j$("a[href*='exhibit_list.php?del_id']").each(function () {
             if (j$(this).attr("href").match(/del_id=(\d+)/)) {
                 var a = "http://" + HOST + "/card/trade_bid.php?id=" + RegExp.$1;
                 m += a + "\n"
@@ -623,8 +635,9 @@ try{
         j$("#direct_link_lists").val(m)
     }
     if (location.pathname == "/card/bid_list.php") {
+        debug_log('リスト一括入札');
         var m = "";
-        j$("div[class=ui-tabs-panel]").append("<div id=direct_trade>");
+        j$("div.ui-tabs-panel").append("<div id=direct_trade>");
         j$("#direct_trade").css({
             "margin-top": "10px",
             "margin-bottom": "5px",
@@ -637,8 +650,8 @@ try{
             "text-align": "right"
         });
         j$("#auto_bid").bind('click', function () {
-            if (j$("div[class=right]").length != 0) {
-                j$("div[class=right]").text().match(/(\d+)件 \/ 10件/);
+            if (j$("div.right").length != 0) {
+                j$("div.right").text().match(/(\d+)件 \/ 10件/);
                 if (parseInt(RegExp.$1) >= 10) {
                     return
                 }
@@ -649,8 +662,9 @@ try{
         })
     }
     if (location.pathname == "/card/busyobook_picture.php") {
-        j$("img[src*=bg_blank_card.png]").each(function () {
-            var a = j$("span[class=cardno]", j$(this).parent()).text().trim();
+        debug_log('トレードで探すボタン');
+        j$("a.card-link").each(function () {
+            var a = j$("span.cardno", j$(this).parent()).text().trim();
             j$(this).parent().append("<input type=button value=トレードで探す>").css({
                 "text-align": "center",
                 "z-index": "10"
@@ -671,6 +685,7 @@ try{
         j$("select[name=res_s2]").val(("0" + o.getSeconds()).slice(-1))
     }
     if (location.pathname == "/busyodas/busyodas.php") {
+        debug_log('自動ブショーダスライト');
         var p;
         var q = parseInt(j$("li[class=first_bpbtn] span").text());
         j$("div[class=sysMes]").text().match(/残り(\d+)枚/);
@@ -846,10 +861,11 @@ try{
             j$("#AutoDrawBushodas").removeAttr("disabled")
         }
     }
-    if (location.pathname == "/busyodas/b3kuji.php") {
-        j$("div[class=sysMes]").text().match(/残り(\d+)回/);
+    if (location.pathname == "/reward_vendor/reward_vendor.php" || location.pathname == "/busyodas/b3kuji.php") {
+        debug_log('自動ヨロズダス');
+        j$("div.sysMes").text().match(/残り(\d+)回/);
         var s = parseInt(RegExp.$1);
-        j$("div[class=sysMes]").before("<div id=AutoYodozudas>");
+        j$("div.sysMes").before("<div id=AutoYodozudas>");
         j$("#AutoYodozudas").append("<div id=AutoYodozudasControls>");
         j$("#AutoYodozudas").append("<div id=DrawResult>");
         j$("#AutoYodozudasControls").append("<input type=button id=AutoDrawYorozudas value=自動ヨロズダス>");
@@ -976,24 +992,24 @@ function AutoBid(b) {
         j$("#AjaxTempDOM").hide();
         j$("#AjaxTempDOM").load(c + " #gray02Wrapper", function () {
             var a = {};
-            if (j$("input[name=exhibit_cid]").length != 0) {
-                a['t'] = j$("input[name=t]").val();
-                a['k'] = j$("input[name=k]").val();
-                a['p'] = j$("input[name=p]").val();
-                a['s'] = j$("input[name=s]").val();
-                a['o'] = j$("input[name=o]").val();
-                a['exhibit_cid'] = j$("input[name=exhibit_cid]").val();
-                a['exhibit_id'] = j$("input[name=exhibit_id]").val();
+            if (j$("input[name='exhibit_cid']").length != 0) {
+                a['t'] = j$("input[name='t']").val();
+                a['k'] = j$("input[name='k']").val();
+                a['p'] = j$("input[name='p']").val();
+                a['s'] = j$("input[name='s']").val();
+                a['o'] = j$("input[name='o']").val();
+                a['exhibit_cid'] = j$("input[name='exhibit_cid']").val();
+                a['exhibit_id'] = j$("input[name='exhibit_id']").val();
                 a['buy_btn'] = "落札する"
             } else {
-                a['ssid'] = j$("input[name=ssid]").val();
-                a['t'] = j$("input[name=t]").val();
-                a['k'] = j$("input[name=k]").val();
-                a['p'] = j$("input[name=p]").val();
-                a['s'] = j$("input[name=s]").val();
-                a['o'] = j$("input[name=o]").val();
-                a['exhibit_price'] = j$("input[name=exhibit_price]").val();
-                a['exhibit_id'] = j$("input[name=exhibit_id]").val();
+                a['ssid'] = j$("input[name='ssid']").val();
+                a['t'] = j$("input[name='t']").val();
+                a['k'] = j$("input[name='k']").val();
+                a['p'] = j$("input[name='p']").val();
+                a['s'] = j$("input[name='s']").val();
+                a['o'] = j$("input[name='o']").val();
+                a['exhibit_price'] = j$("input[name='exhibit_price']").val();
+                a['exhibit_id'] = j$("input[name='exhibit_id']").val();
                 a['bid_btn'] = "入札する"
             }
             j$("#notice_msg").text("(トレードID " + j$("input[name=exhibit_id]").val() + " を入札中)");
@@ -1147,7 +1163,8 @@ function AutoYorozudas(b) {
     j$("#AjaxTempDOM").hide();
     if (b == 0) {
         setTimeout(function () {
-            location.href = "http://" + HOST + "/busyodas/b3kuji.php"
+            // location.href = "http://" + HOST + "/busyodas/b3kuji.php"
+            location.reload(true);
         }, 1000);
         return
     }
@@ -1155,7 +1172,7 @@ function AutoYorozudas(b) {
     var d = Math.floor(Math.random() * 500 + 1000);
     c['got_type'] = "0";
     c['send'] = "send";
-    j$("#AjaxTempDOM").load("http://" + HOST + "/busyodas/b3kuji.php #gray02Wrapper", c, function () {
+    j$("#AjaxTempDOM").load(j$('form').attr('action') + " #gray02Wrapper", c, function () {
         if (j$("p:contains(おめでとうございます！)").length != 0) {
             j$("p:contains(おめでとうございます！)").html().match(/<strong>(.+)&nbsp;/);
             var a = "<strong>" + RegExp.$1 + "</strong>";
@@ -1171,13 +1188,13 @@ function AutoYorozudas(b) {
 }
 function Search(l) {
     var m = 1;
-    if (j$("a[title=last page]:first").length != 0) {
-        j$("a[title=last page]:first").attr("href").match(/p=(\d+)/);
+    if (j$("a[title='last page']:first").length != 0) {
+        j$("a[title='last page']:first").attr("href").match(/p=(\d+)/);
         m = parseInt(RegExp.$1)
     }
     if (l > m) {
         j$("#do_search").removeAttr("disabled");
-        j$("#process_msg").text("検索完了 " + j$("#total_counts").val() + " 件見つかりました");
+        j$("#process_msg").text("検索完了( " + l + "/" + m + " )" + j$("#total_counts").val() + " 件見つかりました");
         return
     }
     var n = new Date(j$("#from_y").val(), j$("#from_m").val() - 1, j$("#from_d").val(), j$("#from_h").val());
@@ -1193,13 +1210,13 @@ function Search(l) {
         j$("#AjaxTempDOM").hide()
     }
     j$("#AjaxTempDOM").load(location.href + "&p=" + l + " #gray02Wrapper", function () {
-        var i = new Date(j$("td[class*=contents]:first", this).text().replace(/-/g, "/"));
-        var j = new Date(j$("td[class*=contents]:last", this).text().replace(/-/g, "/"));
+        var i = new Date(j$("td[class*='contents']:first", this).text().replace(/-/g, "/"));
+        var j = new Date(j$("td[class*='contents']:last", this).text().replace(/-/g, "/"));
         var k = false;
         if (n.getTime() - o.getTime() != 0) {
             if (i.getTime() <= n.getTime()) {
                 j$("#do_search").removeAttr("disabled");
-                j$("#process_msg").text("検索完了 " + j$("#total_counts").val() + " 件見つかりました");
+                j$("#process_msg").text("検索完了( " + l + "/" + m + " )" + j$("#total_counts").val() + " 件見つかりました");
                 return
             }
             if (j.getTime() > o.getTime()) {
@@ -1207,13 +1224,13 @@ function Search(l) {
             }
         }
         if (k == false) {
-            j$("a[href*=detail.php?id=]:contains(" + j$("#search_query").val().trim() + ")", this).each(function () {
+            j$("a[href*='detail.php?id=']:contains('" + j$("#search_query").val().trim() + "')", this).each(function () {
                 var a = j$(this).text();
                 var b = j$("img", j$(this).parent()).attr("src");
                 var c = j$(this).attr("href");
-                var d = j$("td[class*=contents]", j$(this).parent().parent()).text();
-                var e = j$("a[href*=/facility/castle_send_troop.php]", j$(this).parent().parent()).attr("href");
-                var f = j$("img[src*=icon_go.gif]", j$(this).parent().parent()).attr("src");
+                var d = j$("td[class*='contents']", j$(this).parent().parent()).text();
+                var e = j$("a[href*='/facility/castle_send_troop.php']", j$(this).parent().parent()).attr("href");
+                var f = j$("img[src*='icon_go.gif']", j$(this).parent().parent()).attr("src");
                 var g = true;
                 if (n.getTime() - o.getTime() != 0) {
                     var h = new Date(d.replace(/-/g, "/"));
