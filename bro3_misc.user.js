@@ -27,14 +27,6 @@
 // @version        0.4.6.a3
 // ==/UserScript==
 
-//2012/07/14 URを削除しないようにしたつもり・・・・　変更点　AC
-//2012/07/24 水鏡を削除しないようにしたつもり・・・　変更点　AC1
-//2012/08/24 雑多な改善・・・変更点　ac.3
-//2012/11/28 FIX:checkbox.attr('checked') 返り値がBooleanではなく文字列('checked','yes','true'など)にも対応 -- griffith
-//2012/11/28 BASARAでも画面が出るように(但しAutoBushodasLiteは不能) -- griffith
-//2012/11/28 タイ語版ブラ三でもAutoBushodasLite -- griffith
-// require        http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js
-
 var logtitle = 'bro3_misc';
 
 if(typeof GM_getMetadata != 'undefined') {
@@ -141,34 +133,34 @@ try{
     }
     if (location.pathname.match(/\/tutorial\//)) {
         debug_log('チュートリアル補助機能');
-        j$("p[align=center]").append("<div id=AutoTutorialMsg>");
-        if (j$("a[href=/tutorial/index.php?st=1]").length != 0) {
+        j$("p[align='center']").append("<div id=AutoTutorialMsg>");
+        if (j$("a[href='/tutorial/index.php?st=1']").length != 0) {
             alert("「領地の取り方」 及び 「武将のレベルアップ」以外は操作しないで下さい.\n操作した場合は当該チュートリアルを手動で行うか, チュートリアルタブを再度クリックする必要があります.\n状況確認等は新しいウインドウを作成して行って下さい.");
             location.href = "http://" + HOST + "/tutorial/index.php?st=1"
         }
-        if (j$("img[src*=hd_complete_tutorial.gif]").length != 0) {
+        if (j$("img[src*='hd_complete_tutorial.gif']").length != 0) {
             location.href = "http://" + HOST + "/tutorial/";
             return
         }
-        if (j$("span[class=ttl_small]:contains(武将をデッキにセット)").length != 0) {
+        if (j$("span.ttl_small:contains('武将をデッキにセット')").length != 0) {
             j$(document.body).append("<div id=AjaxTempDOM>");
             j$("#AjaxTempDOM").hide();
             j$("#AjaxTempDOM").load("http://" + HOST + "/card/deck.php" + " #gray02Wrapper", function () {
                 var a = {};
-                var b = j$("img[alt=このカードをデッキにセットします]:eq(0)").attr("onClick").split(",")[1].trim();
+                var b = j$("img[alt='このカードをデッキにセットします']:eq(0)").attr("onClick").split(",")[1].trim();
                 a['target_card'] = b;
                 a['selected_village[' + b + ']'] = j$("#selected_village_" + b + " option:first-child").val();
                 a['btn_change_flg'] = "";
                 a['mode'] = "set";
                 a['p'] = "1";
-                a['ssid'] = j$("input[name=ssid]:eq(0)").val();
+                a['ssid'] = j$("input[name='ssid']:eq(0)").val();
                 j$.post("http://" + HOST + "/card/deck.php", a, function () {
                     location.href = "http://" + HOST + "/tutorial/"
                 })
             })
         }
-        if (j$("span[class=ttl_small]:contains(武将カード)").length != 0) {
-            if (j$("input[name=送信]").attr("onClick").split(",")[2].match(/\'([a-z0-9]+)\'/) == null) {
+        if (j$("span.ttl_small:contains('武将カード')").length != 0) {
+            if (j$("input[name='送信']").attr("onClick").split(",")[2].match(/\'([a-z0-9]+)\'/) == null) {
                 return
             }
             var h = {};
@@ -179,14 +171,14 @@ try{
                 location.href = "http://" + HOST + "/tutorial/"
             })
         }
-        if (j$("span[class=ttl_small]:contains(内政設定)").length != 0) {
+        if (j$("span.ttl_small:contains('内政設定')").length != 0) {
             j$(document.body).append("<div id=AjaxTempDOM>");
             j$("#AjaxTempDOM").hide();
             j$("#AjaxTempDOM").load("http://" + HOST + "/card/domestic_setting.php" + " #gray02Wrapper", function () {
                 var a = {};
                 a['mode'] = "domestic";
-                a['id'] = j$("input[name=id]:eq(0)").val();
-                if (j$("input[name=id]:eq(0)").length != 0) {
+                a['id'] = j$("input[name='id']:eq(0)").val();
+                if (j$("input[name='id']:eq(0)").length != 0) {
                     j$.get("http://" + HOST + "/card/domestic_setting.php", a, function () {
                         location.href = "http://" + HOST + "/tutorial/"
                     })
@@ -195,23 +187,23 @@ try{
                 }
             })
         }
-        if (j$("span[class=ttl_small]:contains(畑の建設)").length != 0) {
+        if (j$("span.ttl_small:contains('畑の建設')").length != 0) {
             var j = new Array();
             j.push(new Facility(215, 1, 4, 5));
             BuildFacility(j)
         }
-        if (j$("span[class=ttl_small]:contains(伐採所の建設)").length != 0) {
+        if (j$("span.ttl_small:contains('伐採所の建設')").length != 0) {
             var j = new Array();
             j.push(new Facility(209, 1, 2, 1));
             BuildFacility(j)
         }
-        if (j$("span[class=ttl_small]:contains(石切り場と製鉄所の建設)").length != 0) {
+        if (j$("span.ttl_small:contains('石切り場と製鉄所の建設')").length != 0) {
             var j = new Array();
             j.push(new Facility(211, 1, 4, 1));
             j.push(new Facility(213, 1, 2, 5));
             BuildFacility(j)
         }
-        if (j$("span[class=ttl_small]:contains(複数建設)").length != 0) {
+        if (j$("span.ttl_small:contains('複数建設')").length != 0) {
             var j = new Array();
             j.push(new Facility(209, 1, 1, 0));
             j.push(new Facility(211, 1, 5, 0));
@@ -219,21 +211,21 @@ try{
             j.push(new Facility(215, 1, 4, 6));
             BuildFacility(j)
         }
-        if (j$("span[class=ttl_small]:contains(倉庫の建設)").length != 0) {
+        if (j$("span.ttl_small:contains('倉庫の建設')").length != 0) {
             var j = new Array();
             j.push(new Facility(233, 1, 0, 6));
             BuildFacility(j)
         }
-        if (j$("span[class=ttl_small]:contains(練兵所の建設)").length != 0) {
+        if (j$("span.ttl_small:contains('練兵所の建設')").length != 0) {
             var j = new Array();
             j.push(new Facility(234, 1, 6, 3));
             BuildFacility(j)
         }
-        if (j$("span[class=ttl_small]:contains(兵士を鍛える)").length != 0) {
+        if (j$("span.ttl_small:contains('兵士を鍛える')").length != 0) {
             j$(document.body).append("<div id=AjaxTempDOM>");
             j$("#AjaxTempDOM").hide();
             j$("#AjaxTempDOM").load("http://" + HOST + "/facility/facility.php?x=6&y=3 #gray02Wrapper", function () {
-                var b = parseInt(j$("table:has(img[src*=unit_301l.png]) tr:has(th:contains(現在の所有数)) td").text()) + j$("table:has(img[src*=unit_301l.png]) tr:has(th:contains(作成数)) td").length;
+                var b = parseInt(j$("table:has(img[src*='unit_301l.png']) tr:has(th:contains('現在の所有数')) td").text()) + j$("table:has(img[src*='unit_301l.png']) tr:has(th:contains('作成数')) td").length;
                 if (b == 0) {
                     var c = {};
                     c['x'] = "6";
@@ -250,8 +242,8 @@ try{
                     })
                 } else {
                     var d = 0;
-                    if (j$("table:has(img[src*=unit_301l.png]) tr:has(th:contains(作成残り時間)) td").length != 0) {
-                        var e = j$("table:has(img[src*=unit_301l.png]) tr:has(th:contains(作成残り時間)) td").text();
+                    if (j$("table:has(img[src*='unit_301l.png']) tr:has(th:contains('作成残り時間')) td").length != 0) {
+                        var e = j$("table:has(img[src*='unit_301l.png']) tr:has(th:contains('作成残り時間')) td").text();
                         e.match(/(\d\d):(\d\d):(\d\d)/);
                         d = parseInt(RegExp.$1, 10) * 60 * 60 * 1000 + parseInt(RegExp.$2, 10) * 60 * 1000 + parseInt(RegExp.$3, 10) * 1000;
                         j$("#AutoTutorialMsg").text("(剣兵作成中" + e + "後に完成)")
@@ -262,7 +254,7 @@ try{
                 }
             })
         }
-        if (j$("span[class=ttl_small]:contains(兵士の能力)").length != 0) {
+        if (j$("span.ttl_small:contains('兵士の能力')").length != 0) {
             var h = {};
             h['tuto_attack'] = "15";
             h['tuto_defense_spear'] = "10";
@@ -270,23 +262,23 @@ try{
                 location.href = "http://" + HOST + "/tutorial/"
             })
         }
-        if (j$("span[class=ttl_small]:contains(武将を内政から外す)").length != 0) {
+        if (j$("span.ttl_small:contains('武将を内政から外す')").length != 0) {
             j$(document.body).append("<div id=AjaxTempDOM>");
             j$("#AjaxTempDOM").hide();
             j$("#AjaxTempDOM").load("http://" + HOST + "/card/domestic_setting.php" + " #gray02Wrapper", function () {
                 var a = {};
                 a['mode'] = "u_domestic";
-                a['id'] = j$("input[name=id]:eq(0)").val();
+                a['id'] = j$("input[name='id']:eq(0)").val();
                 j$.get("http://" + HOST + "/card/domestic_setting.php", a, function () {
                     location.href = "http://" + HOST + "/tutorial/"
                 })
             })
         }
-        if (j$("span[class=ttl_small]:contains(全体地図)").length != 0) {
+        if (j$("span.ttl_small:contains('全体地図')").length != 0) {
             j$(document.body).append("<div id=AjaxTempDOM>");
             j$("#AjaxTempDOM").hide();
             j$("#AjaxTempDOM").load("http://" + HOST + "/alliance/list.php?p=1" + " #grayWrapper", function () {
-                if (j$("a[href*=land.php]:eq(0)").text().match(/\((-?\d+),(-?\d+)\)/)) {
+                if (j$("a[href*='land.php']:eq(0)").text().match(/\((-?\d+),(-?\d+)\)/)) {
                     var a = {};
                     a['tuto_x'] = RegExp.$1;
                     a['tuto_y'] = RegExp.$2;
@@ -296,19 +288,19 @@ try{
                 }
             })
         }
-        if (j$("span[class=ttl_small]:contains(領地の取り方)").length != 0) {
+        if (j$("span.ttl_small:contains('領地の取り方')").length != 0) {
             j$("#AutoTutorialMsg").html("自動化対象外のチュートリアルです<br />手動で領地を取得して下さい!").css({
                 "color": "orangered",
                 "font-weight": "bold"
             })
         }
-        if (j$("span[class=ttl_small]:contains(武将のレベルアップ)").length != 0) {
+        if (j$("span.ttl_small:contains('武将のレベルアップ')").length != 0) {
             j$("#AutoTutorialMsg").html("自動化対象外のチュートリアルです<br />手動でクエストクリアして下さい!").css({
                 "color": "orangered",
                 "font-weight": "bold"
             })
         }
-        if (j$("span[class=ttl_small]:contains(施設のレベルアップ)").length != 0) {
+        if (j$("span.ttl_small:contains('施設のレベルアップ')").length != 0) {
             var j = new Array();
             j.push(new Facility(209, 2, 2, 1));
             j.push(new Facility(211, 2, 4, 1));
@@ -316,8 +308,8 @@ try{
             j.push(new Facility(215, 2, 4, 5));
             BuildFacility(j)
         }
-        if (j$("span[class=ttl_small]:contains(本拠地に名前を付けよう)").length != 0) {
-            if (j$("input[name=送信]").attr("onClick").split(",")[2].match(/\'([a-z0-9]+)\'/) == null) {
+        if (j$("span.ttl_small:contains('本拠地に名前を付けよう')").length != 0) {
+            if (j$("input[name='送信']").attr("onClick").split(",")[2].match(/\'([a-z0-9]+)\'/) == null) {
                 return
             }
             var k = RegExp.$1;
@@ -325,22 +317,22 @@ try{
             j$("#AjaxTempDOM").hide();
             j$("#AjaxTempDOM").load("http://" + HOST + "/user/change/change.php" + " #gray02Wrapper", function () {
                 var c = {};
-                j$("input[name*=new_name]").each(function () {
+                j$("input[name*='new_name']").each(function () {
                     var a = j$(this).attr("name");
                     var b = j$(this).val();
                     b = b.replace("新規城", "新城");
                     c[a] = b
                 });
                 c['ssid'] = k;
-                c['comment'] = j$("textarea[name=comment]").val();
-                c['medal'] = j$("textarea[name=medal]").val();
+                c['comment'] = j$("textarea[name='comment']").val();
+                c['medal'] = j$("textarea[name='medal']").val();
                 c['btn_send'] = "更新";
                 j$.post("http://" + HOST + "/user/change/change.php", c, function () {
                     location.href = "http://" + HOST + "/tutorial/"
                 })
             })
         }
-        if (j$("span[class=ttl_small]:contains(人口とは？)").length != 0) {
+        if (j$("span.ttl_small:contains('人口とは？')").length != 0) {
             var j = new Array();
             j.push(new Facility(242, 1, 3, 6));
             j.push(new Facility(209, 3, 2, 1));
@@ -349,7 +341,7 @@ try{
             j.push(new Facility(215, 3, 4, 5));
             BuildFacility(j)
         }
-        if (j$("span[class=ttl_small]:contains(掲示板)").length != 0) {
+        if (j$("span.ttl_small:contains('掲示板')").length != 0) {
             var h = {};
             h['title'] = "AutoTutorial";
             h['comment'] = "I love いかりや長介";
@@ -362,7 +354,7 @@ try{
                 location.href = "http://" + HOST + "/tutorial/"
             })
         }
-        if (j$("span[class=ttl_small]:contains(防衛戦)").length != 0) {
+        if (j$("span.ttl_small:contains('防衛戦')").length != 0) {
             j$(document.body).append("<div id=AjaxTempDOM>");
             j$("#AjaxTempDOM").hide();
             j$("#AjaxTempDOM").load("http://" + HOST + "/user/ #gray02Wrapper", function () {
@@ -383,7 +375,7 @@ try{
                 })
             })
         }
-        if (j$("span[class=ttl_small]:contains(内政の強化)").length != 0) {
+        if (j$("span.ttl_small:contains(内政の強化)").length != 0) {
             j$(document.body).append("<div id=AjaxTempDOM>");
             j$("#AjaxTempDOM").hide();
             j$("#AjaxTempDOM").load("http://" + HOST + "/bbs/personal_topic_view.php" + " #gray02Wrapper", function () {
@@ -404,7 +396,7 @@ try{
         }
     }
     if (location.pathname == "/quest/" || location.pathname == "/quest/index.php") {
-        j$("td[class=questName]").attr("width", 203);
+        j$("td.questName").attr("width", 203);
         var l = {};
         l["ともだちを招待しよう"] = "CP 150";
         l["同盟を組む"] = "BP 100";
@@ -533,17 +525,17 @@ try{
         l["倉庫の上限を増やそう　其三"] = "小麗チケット 1枚";
         l["倉庫の上限を増やそう　其四"] = "小麗チケット 2枚";
         l["倉庫の上限を増やそう　其五"] = "大鳳チケット 1枚";
-        j$("a[href*=/quest/index.php?disp_id]").each(function () {
+        j$("a[href*='/quest/index.php?disp_id']").each(function () {
             if (j$(this).text() in l) {
                 var a = l[j$(this).text()];
-                a = a.replace("木", "<img src=" + j$("img[src*=ico_wood.gif]:first").attr("src") + " />");
-                a = a.replace("石", "<img src=" + j$("img[src*=ico_stone.gif]:first").attr("src") + " />");
-                a = a.replace("鉄", "<img src=" + j$("img[src*=ico_ingot.gif]:first").attr("src") + " />");
-                a = a.replace("糧", "<img src=" + j$("img[src*=ico_grain.gif]:first").attr("src") + " />");
-                a = a.replace("名声", "<img src=" + j$("img[src*=ico_fame.gif]:first").attr("src") + " />");
-                a = a.replace("BP", "<img src=" + j$("img[src*=icon_header_bp.gif]:first").attr("src") + " />");
-                a = a.replace("TP", "<img src=" + j$("img[src*=icon_header_tp.gif]:first").attr("src") + " />");
-                a = a.replace("CP", "<img src=" + j$("img[src*=icon_header_cp.gif]:first").attr("src") + " />");
+                a = a.replace("木", "<img src=" + j$("img[src*='ico_wood.gif']:first").attr("src") + " />");
+                a = a.replace("石", "<img src=" + j$("img[src*='ico_stone.gif']:first").attr("src") + " />");
+                a = a.replace("鉄", "<img src=" + j$("img[src*='ico_ingot.gif']:first").attr("src") + " />");
+                a = a.replace("糧", "<img src=" + j$("img[src*='ico_grain.gif']:first").attr("src") + " />");
+                a = a.replace("名声", "<img src=" + j$("img[src*='ico_fame.gif']:first").attr("src") + " />");
+                a = a.replace("BP", "<img src=" + j$("img[src*='icon_header_bp.gif']:first").attr("src") + " />");
+                a = a.replace("TP", "<img src=" + j$("img[src*='icon_header_tp.gif']:first").attr("src") + " />");
+                a = a.replace("CP", "<img src=" + j$("img[src*='icon_header_cp.gif']:first").attr("src") + " />");
                 a = a.replace("シルバーチケット", "<img src=/20111003-04/extend_project/w760/img/busyodas/img_rate_silver_ex.jpg height=48px />");
                 a = a.replace("小麗チケット", "<img src=/extend_project/ybga/img/busyodas/img_rate_syourei_no.jpg height=48px />");
                 a = a.replace("大鳳チケット", "<img src=/extend_project/ybga/img/busyodas/img_rate_taihoh_no.jpg height=48px />");
@@ -558,36 +550,36 @@ try{
         })
     }
     if (location.pathname == "/quest/index.php") {
-        if (j$("input[name=disp_id]").val() == "166") {
+        if (j$("input[name='disp_id']").val() == "166") {
             j$(document.body).append("<div id=AjaxTempDOM>");
             j$("#AjaxTempDOM").hide();
             j$("#AjaxTempDOM").load("http://" + HOST + "/user/weekly_ranking.php" + " #weeklyranking_tables", function () {
                 if (j$("table:has(th:contains('攻撃')) td:contains('→'):eq(0)").text().match(/→ (\d+)/)) {
-                    j$("input[name=attack_rank]").val(RegExp.$1)
+                    j$("input[name='attack_rank']").val(RegExp.$1)
                 }
             })
         }
-        if (j$("input[name=disp_id]").val() == "123") {
+        if (j$("input[name='disp_id']").val() == "123") {
             j$(document.body).append("<div id=AjaxTempDOM>");
             j$("#AjaxTempDOM").hide();
             j$("#AjaxTempDOM").load("http://" + HOST + "/user/ranking.php" + " #grayWrapper", function () {
-                if (j$("td[class=rankNum]:contains('→')").text().match(/→ (\d+)/)) {
-                    j$("input[name=tuto_p_ranking]").val(RegExp.$1)
+                if (j$("td.rankNum:contains('→')").text().match(/→ (\d+)/)) {
+                    j$("input[name='tuto_p_ranking']").val(RegExp.$1)
                 }
             })
         }
-        if (j$("input[name=disp_id]").val() == "106") {
+        if (j$("input[name='disp_id']").val() == "106") {
             j$(document.body).append("<div id=AjaxTempDOM>");
             j$("#AjaxTempDOM").hide();
             j$("#AjaxTempDOM").load("http://" + HOST + "/alliance/list.php" + " #grayWrapper", function () {
-                if (j$("td[class=rankNum]:contains('→')").text().match(/→ (\d+)/)) {
-                    j$("input[name=alliance_rank]").val(RegExp.$1)
+                if (j$("td.rankNum:contains('→')").text().match(/→ (\d+)/)) {
+                    j$("input[name='alliance_rank']").val(RegExp.$1)
                 }
             })
         }
-        if (j$("input[name=disp_id]").val() == "111") {
-            j$("input[name=x]").val("0");
-            j$("input[name=y]").val("0")
+        if (j$("input[name='disp_id']").val() == "111") {
+            j$("input[name='x']").val("0");
+            j$("input[name='y']").val("0")
         }
     }
     if (location.pathname == "/card/trade.php") {
@@ -611,7 +603,7 @@ try{
         j$("#control_area").css({
             "text-align": "right"
         });
-        j$("tr:has(strong:contains(10))").each(function () {
+        j$("tr:has(strong:contains('10'))").each(function () {
             if (j$("td.limit", this).text().trim() == "---" && parseInt(j$("strong", this).html().replace(",", "")) == 10) {
                 j$("a[href*='trade_bid.php']", this).attr("href").match(/id=(\d+)/);
                 var a = "http://" + HOST + "/card/trade_bid.php?id=" + RegExp.$1;
@@ -697,20 +689,20 @@ try{
     }
     if (location.pathname == "/facility/castle_send_troop.php") {
         var o = new Date();
-        j$("select[name=res_y]").val(o.getYear());
-        j$("select[name=res_m]").val(o.getMonth() + 1);
-        j$("select[name=res_d]").val(o.getDate());
-        j$("select[name=res_h]").val(o.getHours());
-        j$("select[name=res_i1]").val(("0" + o.getMinutes()).slice(-2, -1));
-        j$("select[name=res_i2]").val(("0" + o.getMinutes()).slice(-1));
-        j$("select[name=res_s1]").val(("0" + o.getSeconds()).slice(-2, -1));
-        j$("select[name=res_s2]").val(("0" + o.getSeconds()).slice(-1))
+        j$("select[name='res_y']").val(o.getYear());
+        j$("select[name='res_m']").val(o.getMonth() + 1);
+        j$("select[name='res_d']").val(o.getDate());
+        j$("select[name='res_h']").val(o.getHours());
+        j$("select[name='res_i1']").val(("0" + o.getMinutes()).slice(-2, -1));
+        j$("select[name='res_i2']").val(("0" + o.getMinutes()).slice(-1));
+        j$("select[name='res_s1']").val(("0" + o.getSeconds()).slice(-2, -1));
+        j$("select[name='res_s2']").val(("0" + o.getSeconds()).slice(-1))
     }
     if (location.pathname == "/busyodas/busyodas.php") {
         debug_log('自動ブショーダスライト');
         var p;
-        var q = parseInt(j$("li[class=first_bpbtn] span").text());
-        j$("div[class=sysMes]").text().match(/残り(\d+)枚/);
+        var q = parseInt(j$("li.first_bpbtn span").text());
+        j$("div.sysMes").text().match(/残り(\d+)枚/);
         var r = parseInt(RegExp.$1);
         if(j$("#busyodasTabContent:has(img[src*='hd_lite.jpg']) table").length != 0) {
           j$("#busyodasTabContent:has(img[src*='hd_lite.jpg']) table").before("<div id=AutoBushodasLite>");
@@ -794,7 +786,7 @@ try{
             "margin-bottom": "10px",
             "width": "140px"
         });
-        j$(".Rarity_UR").css({　//ac.3
+        j$(".Rarity_UR").css({ //ac.3
             "color": "#ff33ff",  //ac.3
             "font-weight": "bold"  //ac.3
         });
@@ -817,7 +809,7 @@ try{
         p = GM_getValue(KEY + "AutoDelete", false);
         j$("#auto_delete").attr("checked", p);
         if (p == false) {
-            j$("input[type=checkbox][id*=except_]").attr("disabled", "disabled");
+            j$("input[type='checkbox'][id*='except_']").attr("disabled", "disabled");
             j$("#white_lists").attr("disabled", "disabled")
         }
         p = GM_getValue(KEY + "Keep_Hero", false);
@@ -844,7 +836,7 @@ try{
         j$("#except_above_C").attr("checked", p);
         p = GM_getValue(KEY + "White_Lists", "");
         j$("#white_lists").val(p);
-        j$("input[type=checkbox]:checked").parent().css("color", "orangered");
+        j$("input[type='checkbox']:checked").parent().css("color", "orangered");
         j$("#save_settings").bind('click', function () {
             GM_setValue(KEY + "AutoDelete", j$("#auto_delete").attr("checked")||false);
             GM_setValue(KEY + "White_Lists", j$("#white_lists").attr("value"));
@@ -864,15 +856,15 @@ try{
         j$("#auto_delete").bind('click', function () {
             if (j$(this).attr('checked') == false) {
                 j$(this).parent().css("color", "black");
-                j$("input[type=checkbox][id*=except_]").attr("disabled", "disabled");
+                j$("input[type='checkbox'][id*='except_']").attr("disabled", "disabled");
                 j$("#white_lists").attr("disabled", "disabled")
             } else {
                 j$(this).parent().css("color", "orangered");
-                j$("input[type=checkbox][id*=except_]").removeAttr("disabled");
+                j$("input[type='checkbox'][id*='except_']").removeAttr("disabled");
                 j$("#white_lists").removeAttr("disabled")
             }
         });
-        j$("input[type=checkbox][id*=except_]").bind('click', function () {
+        j$("input[type='checkbox'][id*='except_']").bind('click', function () {
             if (j$(this).attr('checked') == false) {
                 j$(this).parent().css("color", "black")
             } else {
@@ -947,8 +939,8 @@ function BuildFacility(e) {
         j$("#AjaxTempDOM").load("http://" + HOST + "/village.php #wrapper", function () {
             var a = 0;
             var b;
-            if (j$("span[class=buildClock]:last").length != 0) {
-                b = j$("span[class=buildClock]:last").text();
+            if (j$("span.buildClock:last").length != 0) {
+                b = j$("span.buildClock:last").text();
                 b.match(/(\d\d):(\d\d):(\d\d)/);
                 a = parseInt(RegExp.$1, 10) * 60 * 60 * 1000 + parseInt(RegExp.$2, 10) * 60 * 1000 + parseInt(RegExp.$3, 10) * 1000
             }
@@ -965,20 +957,20 @@ function BuildFacility(e) {
         var a = {};
         a['x'] = e[0].x;
         a['y'] = e[0].y;
-        a['village_id'] = j$("input[name=village_id]:eq(0)").val();
-        a['ssid'] = j$("input[name=ssid]:eq(0)").val();
+        a['village_id'] = j$("input[name='village_id']:eq(0)").val();
+        a['ssid'] = j$("input[name='ssid']:eq(0)").val();
         var b = 0;
         var c = e[0].lv;
         var d;
-        if (j$("div[class=th_ttl]").length != 0) {
-            j$("div[class=th_ttl]").text().match(/レベル(\d+)/);
+        if (j$("div.th_ttl").length != 0) {
+            j$("div.th_ttl").text().match(/レベル(\d+)/);
             b = RegExp.$1
         }
-        if (j$("div[class=sysMes]:contains(建設中)").length != 0) {
+        if (j$("div.sysMes:contains(建設中)").length != 0) {
             b++
         }
-        if (j$("table:has(img[src*=facility_" + e[0].id + ".png]) tr:has(th:contains(所要時間)) td").length > 0) {
-            BuildTimeStr = j$("table:has(img[src*=facility_" + e[0].id + ".png]) tr:has(th:contains(所要時間)) td").html().trim();
+        if (j$("table:has(img[src*='facility_" + e[0].id + ".png']) tr:has(th:contains('所要時間')) td").length > 0) {
+            BuildTimeStr = j$("table:has(img[src*='facility_" + e[0].id + ".png']) tr:has(th:contains('所要時間')) td").html().trim();
             Pos = BuildTimeStr.indexOf("<span>", 0);
             if (Pos > 0) {
                 BuildTimeStr = BuildTimeStr.substr(0, Pos - 1)
@@ -1110,7 +1102,7 @@ function AutoBushodas(o, p, q) {
         }
         debug_log('AjaxTempDOM:' + a);
         var b = j$("span.cardno").text() || j$("span.gear_cardno").text();
-        var c = j$("span[class*=rarerity]").text();
+        var c = j$("span[class*='rarerity']").text();
         if(!c){
           j$("div.card[class*='rarerity_']").attr('class').match(/_([^_ ]+)/)
           c = RegExp.$1.toUpperCase();
@@ -1120,7 +1112,7 @@ function AutoBushodas(o, p, q) {
         var e = parseFloat(j$("span.cost").text());
         var f = parseFloat(j$("span.status_int").text());
         var g = new Boolean(j$("span.skillName1.red").length);
-        j$("span[class*=skillName1]").text().match(/:(.+)LV/);
+        j$("span[class*='skillName1']").text().match(/:(.+)LV/);
         var h = RegExp.$1;
         var j = " が当たりました!";
         var k = "0";
