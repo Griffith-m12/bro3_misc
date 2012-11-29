@@ -8,6 +8,7 @@
 // @include        http://*.3gokushi.jp/card/exhibit_list.php*
 // @include        http://*.3gokushi.jp/card/bid_list.php*
 // @include        http://*.3gokushi.jp/card/busyobook_picture.php*
+// @include        http://*.3gokushi.jp/card/status_info.php*
 // @include        http://*.3gokushi.jp/busyodas/busyodas.php*
 // @include        http://*.3gokushi.jp/busyodas/b3kuji.php*
 // @include        http://*.3gokushi.jp/reward_vendor/reward_vendor.php*
@@ -648,6 +649,13 @@ try{
         });
         j$("#direct_link_lists").val(m)
     }
+    if (location.pathname == "/card/status_info.php") {
+        debug_log('ステータス+ALLボタンを追加');
+        j$('td.line input[value="+5"]').each(function(){
+          var h = this.outerHTML;
+          j$(this).after(h.replace(', 5)',', 2000)').replace('+5','+ALL') + '</input>');
+        });
+    }
     if (location.pathname == "/card/bid_list.php") {
         debug_log('リスト一括入札');
         var m = "";
@@ -917,9 +925,9 @@ try{
             "float": "right"
         });
         j$("#del_trade_msg").bind('click', function () {
-            j$("tr[class=unread]:has(span[class=notice])").each(function () {
-                if (j$("a[href*=detail.php]", this).text().match(/カード.*落札/) != null) {
-                    t.push(j$("a[href*=detail.php]", this).attr("href"))
+            j$("tr.unread:has(span.notice)").each(function () {
+                if (j$("a[href*='detail.php']", this).text().match(/カード.*落札/) != null) {
+                    t.push(j$("a[href*='detail.php']", this).attr("href"))
                 }
             });
             j$("#del_trade_msg").attr("disabled", "disabled");
@@ -1104,7 +1112,7 @@ function AutoBushodas(o, p, q) {
         var b = j$("span.cardno").text() || j$("span.gear_cardno").text();
         var c = j$("span[class*=rarerity]").text();
         if(!c){
-          j$("div.card.[class*='rarerity_']").attr('class').match(/_([^_ ]+)/)
+          j$("div.card[class*='rarerity_']").attr('class').match(/_([^_ ]+)/)
           c = RegExp.$1.toUpperCase();
         }
         // <div class="clearfix cutin_bg" id="cutin_bg_r" onclick="window.location='./busyodas_result.php?card=579736&got_type=0'">
@@ -1284,8 +1292,8 @@ function DeleteMsgs(b, c) {
     if (b.length == 0) {
         j$("#notice_msg").text("削除作業中");
         var d = {};
-        d['mode'] = j$("input[name=mode]").val();
-        d['p'] = j$("form[name=message] input[name=p]").val();
+        d['mode'] = j$("input[name='mode']").val();
+        d['p'] = j$("form[name='message'] input[name='p']").val();
         d['chk[]'] = c;
         j$.post("http://" + HOST + "/message/delete.php", d, function () {
             j$("#del_trade_msg").removeAttr("disabled");
