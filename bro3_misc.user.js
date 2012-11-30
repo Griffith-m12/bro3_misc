@@ -4,6 +4,7 @@
 // @include        http://*.3gokushi.jp/facility/castle_send_troop.php*
 // @include        http://*.3gokushi.jp/quest/*
 // @include        http://*.3gokushi.jp/tutorial/*
+// @include        http://*.3gokushi.jp/card/deck.php*
 // @include        http://*.3gokushi.jp/card/trade.php*
 // @include        http://*.3gokushi.jp/card/exhibit_list.php*
 // @include        http://*.3gokushi.jp/card/bid_list.php*
@@ -14,6 +15,7 @@
 // @include        http://*.3gokushi.jp/reward_vendor/reward_vendor.php*
 // @include        http://*.3gokushi.jp/alliance/alliance_log.php*
 // @include        http://*.3gokushi.jp/message/inbox.php*
+// @include        http://*.3gokushi.jp/union/lvup.php*
 // @include        http://*.sangokushi.in.th/card/trade.php*
 // @include        http://*.sangokushi.in.th/card/busyobook_picture.php*
 // @include        http://*.sangokushi.in.th/busyodas/b3kuji.php*
@@ -57,6 +59,7 @@ MARGIN = 2500;
         return
     }
 try{
+    var tmp = {};
     if (j$("#AjaxTempDOM").length != 0) {
         j$("#AjaxTempDOM").empty()
     }
@@ -648,6 +651,25 @@ try{
           j$(this).after(h.replace(', 5)',', 2000)').replace('+5','+ALL') + '</input>');
         });
     }
+    if (location.pathname == "/card/deck.php") {
+        debug_log('カード一括破棄ボタンを100枚版デフォルト化');
+        with(j$("img[src*='btn_delete.']").parent()) {
+          attr('href', attr('href') + '?sz=100')
+        }
+        // j$("img[src*='btn_delete.']").parent().attr('href', j$("img[src*='btn_delete.']").parent().attr('href') + '&sz=100')
+    }
+    if(location.pathname == "/union/lvup.php") {
+        debug_log('レベルアップ合成対象入れ替え');
+        j$("div.cardColmn div.control a").each(function(){
+            with(j$(this)){
+                if(attr("class") == "useUnion"){
+                  attr('onclick').match(/\((\d+)\)/);
+                  var cid = RegExp.$1;
+                  after("<a class=\"skill-lvup-button\" title=\"スキルLvUP\" href=\"lvup.php?cid=" + cid + "\">このカードをベースカードにする</a>");
+                }
+            }
+        });
+    }
     if (location.pathname == "/card/bid_list.php") {
         debug_log('リスト一括入札');
         var m = "";
@@ -700,18 +722,31 @@ try{
     }
     if (location.pathname == "/busyodas/busyodas.php") {
         debug_log('自動ブショーダスライト');
+        tmp.Summary = {UR:0, SR:0, R:0, UC:0, C:0, other:0};
         var p;
-        var q = parseInt(j$("li.first_bpbtn span").text());
-        j$("div.sysMes").text().match(/残り(\d+)枚/);
-        var r = parseInt(RegExp.$1);
+        var q;
+        if(j$("li.first_bpbtn span").length != 0){
+          q = parseInt(j$("li.first_bpbtn span").text());
+        } else {
+          q = j$("img[src*='_bp.']").parent().text().replace(/\xA0| |\t/g,'').split("\n")[1];
+        }
+        var r = j$("div.sysMes strong");
+        if(r.length == 5){
+          r = j$("div.sysMes strong").get(2).textContent;
+        } else if(r.length == 8) {
+          r = j$("div.sysMes strong").get(3).textContent;
+        }
+        r = parseInt(r);
         if(j$("#busyodasTabContent:has(img[src*='hd_lite.jpg']) table").length != 0) {
           j$("#busyodasTabContent:has(img[src*='hd_lite.jpg']) table").before("<div id=AutoBushodasLite>");
         } else if(j$("table#get_link").length != 0){
           j$("table#get_link").before("<div id=AutoBushodasLite>");
         } else {
-          j$("DIV#busyodasTabContent.clearfix").insert("<div id=AutoBushodasLite>");
+          j$("DIV#busyodasTabContent.clearfix").append("<div id=AutoBushodasLite>");
         }
+        j$("ul#busyodasTab").append("<li><a href='/busyodas/busyodas_history.php' style='text-indent:0px; text-align:right;'>履歴</a></li>");
         j$("#AutoBushodasLite").append("<div id=AutoBushodasControls>");
+        j$("#AutoBushodasLite").append("<div id=AutoBushodasSummary>");
         j$("#AutoBushodasLite").append("<div id=CardInfo>");
         j$("#AutoBushodasControls").append("<div id=notice_msg>※自動破棄を有効にしても<span class=Rarity_UR>UR</span>, <span class=Rarity_SR>SR</span>, <span class=Rarity_R>R</span>及び優良<span class=Rarity_UC>UC</span>(コスト3/自動スキル/劉備/孫権/諸葛亮/徐庶/水鏡)は破棄対象外</div>");　//ac1
         j$("#AutoBushodasControls").append("<div id=first_line_wrap><div id=delete_enabler title=R以上及び優良UC(コスト3/自動スキル/劉備/孫権/諸葛亮/徐庶/水鏡)を除外><input type=checkbox id=auto_delete>自動破棄を有効にする</div><div id=save_btn><input type=button id=save_settings value=設定保存></div><div id=draw_btn><input type=button id=AutoDrawBushodas value=自動ブショーダス></div></div>");//ac1
@@ -734,6 +769,10 @@ try{
         j$("#AutoBushodasControls").append("</ul>");
         j$("#AutoBushodasControls").append("<div class=except_list>破棄除外(ホワイトリスト) [カードIDを半角かつカンマ区切りで入力]</div>");
         j$("#AutoBushodasControls").append("<div style=clear:both><input type=text id=white_lists size=78></div>");
+        tmp.Summary = JSON.parse(GM_getValue(KEY + "PrevSummary", JSON.stringify(tmp.Summary)));
+        if(!tmp.Summary.UR && !tmp.Summary.SR && !tmp.Summary.R && !tmp.Summary.UC && !tmp.Summary.C && !tmp.Summary.other) { j$("#AutoBushodasSummary").hide(); }
+        GM_deleteValue(KEY + "PrevSummary");
+        j$("#AutoBushodasSummary").html("<span class=Rarity_UR>UR</span> <span id='ABL_Summary_UR'>" + tmp.Summary.UR + "</span>, <span class=Rarity_SR>SR</span> <span id='ABL_Summary_SR'>" + tmp.Summary.SR + "</span>, <span class=Rarity_R>R</span> <span id='ABL_Summary_R'>" + tmp.Summary.R + "</span>, <span class=Rarity_UC>UC</span> <span id='ABL_Summary_UC'>" + tmp.Summary.UC + "</span>, <span class=Rarity_C>C</span> <span id='ABL_Summary_C'>" + tmp.Summary.C + "</span>, (残り:<span id='ABL_Summary_BP'>" + q + "</span>BP / <span id='ABL_Summary_capacity'>" + r + "</span>枠)");
         j$("#notice_msg").css({
             "width": "680px",
             "margin-bottom": "20px"
@@ -759,6 +798,13 @@ try{
             "border": "solid 2px #00b1da",
             "margin-bottom": "5px",
             "padding": "5px"
+        });
+        j$("#AutoBushodasSummary").css({
+            "width": "680px",
+            "font-size": "14px",
+            "text-align": "center",
+            "margin-top": "10px",
+            "margin-bottom": "5px"
         });
         j$("#CardInfo").css({
             "width": "680px",
@@ -873,7 +919,8 @@ try{
         });
         j$("#AutoDrawBushodas").bind('click', function () {
             j$("#AutoDrawBushodas").attr("disabled", "disabled");
-            AutoBushodas(q, r, "0")
+            j$("#AutoBushodasSummary").show();
+            AutoBushodas(q, r, "0", tmp)
         });
         if (r == 0 || parseInt(q / 100) == 0) {
             j$("#AutoDrawBushodas").removeAttr("disabled")
@@ -1044,7 +1091,8 @@ function AutoBid(b) {
         }, 500)
     }
 }
-function AutoBushodas(o, p, q) {
+function AutoBushodas(o, p, q, tmp) {
+    debug_log('AutoBushodas:Enter:' + JSON.stringify({o:o,p:p,q:q}));
     j$(document.body).append("<div id=AjaxTempDOM>");
     j$("#AjaxTempDOM").hide();
     var r;
@@ -1054,11 +1102,11 @@ function AutoBushodas(o, p, q) {
         r = parseInt(o / 100)
     }
     if(j$("input.commentSend").length != 0){
-      j$("input.commentSend").attr("onClick").split(",")[2].match(/\'([a-z0-9]+)\'/);
+      j$("input.commentSend").attr("onClick").split(",").pop().match(/\'([a-z0-9]+)\'/);
     } else if(j$("#commentsendbtn").length != 0){
-      j$("#commentsendbtn").attr("onClick").split(",")[2].match(/\'([a-z0-9]+)\'/);
+      j$("#commentsendbtn").attr("onClick").split(",").pop().match(/\'([a-z0-9]+)\'/);
     } else {
-      return;
+      return false;
     }
     var s = RegExp.$1;
     if (r == 0) {
@@ -1088,6 +1136,22 @@ function AutoBushodas(o, p, q) {
     t['csrf_token'] = s;
     t['del_card_id'] = q;
     var callbackBushodas = function () {
+        if(j$('div.cardover-infomation').length != 0){
+          j$("#CardInfo").html("<span id=result_msg>" + '武将カード所持上限の超過' + "</span>");
+          return false;
+        }
+        var leftBP = 0;
+        var leftSpace = 0;
+        with(j$("div.sysMes2:last strong")) {
+          if(length == 5){
+            leftBP = get(0).textContent;
+            leftSpace = get(2).textContent;
+          } else if(length == 8) {
+            leftSpace = get(3).textContent;
+          }
+          leftBP = parseInt(leftBP);
+          leftSpace = parseInt(leftSpace);
+        }
         var a = '';
         if(j$("a[href*=BusyodasRetry]").length != 0){
           j$("a[href*=BusyodasRetry]").attr("href").match(/\'(\d+)\'/);
@@ -1095,31 +1159,40 @@ function AutoBushodas(o, p, q) {
         } else if(j$("form[name='label1'] input[name='card']").length != 0){
           a = j$("form[name='label1'] input[name='card']").first().val();
         } else if(j$("a[onclick*='BusyodasRetry']").length != 0) {
-          j$("a[onclick*='BusyodasRetry']").attr('onclick').split(",")[2].match(/\'([a-z0-9]+)\'/);
+          j$("a[onclick*='BusyodasRetry']").attr('onclick').split(",").pop().match(/\'([a-z0-9]+)\'/);
           a = RegExp.$1;
         } else {
-          return;
+          return false;
         }
         debug_log('AjaxTempDOM:' + a);
         var b = j$("span.cardno").text() || j$("span.gear_cardno").text();
         var c = j$("span[class*='rarerity']").text();
         if(!c){
-          j$("div.card[class*='rarerity_']").attr('class').match(/_([^_ ]+)/)
+          j$("div.card[class*='rarerity_']").attr('class').match(/_([^_ ]+)(?:$|\s)/)
           c = RegExp.$1.toUpperCase();
         }
         // <div class="clearfix cutin_bg" id="cutin_bg_r" onclick="window.location='./busyodas_result.php?card=579736&got_type=0'">
         var d = j$("span.name").text();
+        if(!d || d.length == 0){
+          d = j$("span.name1").text();
+           if(!d || d.length == 0){
+             d = j$("span.gear_name1").text();
+          }
+        }
         var e = parseFloat(j$("span.cost").text());
         var f = parseFloat(j$("span.status_int").text());
         var g = new Boolean(j$("span.skillName1.red").length);
+
         j$("span[class*='skillName1']").text().match(/:(.+)LV/);
         var h = RegExp.$1;
         var j = " が当たりました!";
         var k = "0";
+        var m = 0;
+        var n = 0;
         // debug_log('getValue:' + JSON.stringify(GM_getValue(KEY + "AutoDelete", false)))
         if (GM_getValue(KEY + "AutoDelete", false) != false) {
             k = a;
-            j = " を自動削除しました!";
+            j = " を自動削除しました";
             if (c == "R" || c == "SR" || c == "UR" || e >= 3.0 || g == true || b == "1007" || b == "1009" || b == "1014" || b == "4082" || b == "3008") { //AC+ac1
                 k = "0";
                 j = " が当たりました!"
@@ -1136,40 +1209,6 @@ function AutoBushodas(o, p, q) {
                 }
             }
         }
-        j$("#CardInfo").html("<span id=card_rarity>" + c + "</span>  " + d + " (No." + b + ")" + h + "<span id=result_msg>" + j + "</span>");
-        if (c == "C") {
-            j$("#card_rarity").css({
-                "color": "black",
-                "font-weight": "bold"
-            })
-        } else if (c == "UC") {
-            j$("#card_rarity").css({
-                "color": "#ffa200",
-                "font-weight": "bold"
-            })
-        } else if (c == "R") {
-            j$("#card_rarity").css({
-                "color": "#00c5ff",
-                "font-weight": "bold"
-            })
-        } else if (c == "SR") {
-            j$("#card_rarity").css({
-                "color": "#ff4242",
-                "font-weight": "bold"
-            })
-        } else if (c == "UR") { //AC
-            j$("#card_rarity").css({ //AC
-                "color": "#ff4242", //AC
-                "font-weight": "bold" //AC
-            }) //AC
-        } else {
-            j$("#card_rarity").css({
-                "color": "#f236fe",
-                "font-weight": "bold"
-            })
-        }
-        var m = 0;
-        var n = 0;
         if (j == " が当たりました!") {
             m = 100;
             n = 1
@@ -1180,13 +1219,62 @@ function AutoBushodas(o, p, q) {
                 "font-weight": "bold"
             })
         }
+        j$("#CardInfo").html("<span id=card_rarity>" + c + "</span>  " + d + " (No." + b + ") " + h + "<span id=result_msg>" + j + "</span>");
+        if (c == "C") {
+            tmp.Summary.C++;
+            j$("#card_rarity").css({
+                "color": "black",
+                "font-weight": "bold"
+            })
+        } else if (c == "UC") {
+            tmp.Summary.UC++;
+            j$("#card_rarity").css({
+                "color": "#ffa200",
+                "font-weight": "bold"
+            })
+        } else if (c == "R") {
+            tmp.Summary.R++;
+            j$("#card_rarity").css({
+                "color": "#00c5ff",
+                "font-weight": "bold"
+            })
+        } else if (c == "SR") {
+            tmp.Summary.SR++;
+            j$("#card_rarity").css({
+                "color": "#ff4242",
+                "font-weight": "bold"
+            })
+        } else if (c == "UR") { //AC
+            tmp.Summary.UR++;
+            j$("#card_rarity").css({ //AC
+                "color": "#ff4242", //AC
+                "font-weight": "bold" //AC
+            }) //AC
+        } else {
+            tmp.Summary.other++;
+            j$("#card_rarity").css({
+                "color": "#f236fe",
+                "font-weight": "bold"
+            })
+        }
+        j$("#AutoBushodasSummary span#ABL_Summary_UR").text(tmp.Summary.UR);
+        j$("#AutoBushodasSummary span#ABL_Summary_SR").text(tmp.Summary.SR);
+        j$("#AutoBushodasSummary span#ABL_Summary_R").text(tmp.Summary.R);
+        j$("#AutoBushodasSummary span#ABL_Summary_UC").text(tmp.Summary.UC);
+        j$("#AutoBushodasSummary span#ABL_Summary_C").text(tmp.Summary.C);
+        // j$("#AutoBushodasSummary span#ABL_Summary_BP").text(o - m);
+        // j$("#AutoBushodasSummary span#ABL_Summary_capacity").text(p - n);
+        j$("#AutoBushodasSummary span#ABL_Summary_BP").text(leftBP);
+        j$("#AutoBushodasSummary span#ABL_Summary_capacity").text(leftSpace + 1 - n);
+        GM_setValue(KEY + "PrevSummary", JSON.stringify(tmp.Summary));
         setTimeout(function () {
-            AutoBushodas(o - m, p - n, k)
+            AutoBushodas(o - m, p - n, k, tmp)
         }, u)
     }
 
     j$("#AjaxTempDOM").load("http://" + HOST + "/busyodas/busyodas.php #gray02Wrapper", t, callbackBushodas);
 }
+
 function AutoYorozudas(b) {
     j$(document.body).append("<div id=AjaxTempDOM>");
     j$("#AjaxTempDOM").hide();
