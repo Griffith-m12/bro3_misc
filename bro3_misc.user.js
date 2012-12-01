@@ -744,7 +744,6 @@ try{
         } else {
           j$("DIV#busyodasTabContent.clearfix").append("<div id=AutoBushodasLite>");
         }
-        j$("ul#busyodasTab").append("<li><a href='/busyodas/busyodas_history.php' style='text-indent:0px; text-align:right;'>履歴</a></li>");
         j$("#AutoBushodasLite").append("<div id=AutoBushodasControls>");
         j$("#AutoBushodasLite").append("<div id=AutoBushodasSummary>");
         j$("#AutoBushodasLite").append("<div id=CardInfo>");
@@ -772,7 +771,7 @@ try{
         tmp.Summary = JSON.parse(GM_getValue(KEY + "PrevSummary", JSON.stringify(tmp.Summary)));
         if(!tmp.Summary.UR && !tmp.Summary.SR && !tmp.Summary.R && !tmp.Summary.UC && !tmp.Summary.C && !tmp.Summary.other) { j$("#AutoBushodasSummary").hide(); }
         GM_deleteValue(KEY + "PrevSummary");
-        j$("#AutoBushodasSummary").html("<span class=Rarity_UR>UR</span> <span id='ABL_Summary_UR'>" + tmp.Summary.UR + "</span>, <span class=Rarity_SR>SR</span> <span id='ABL_Summary_SR'>" + tmp.Summary.SR + "</span>, <span class=Rarity_R>R</span> <span id='ABL_Summary_R'>" + tmp.Summary.R + "</span>, <span class=Rarity_UC>UC</span> <span id='ABL_Summary_UC'>" + tmp.Summary.UC + "</span>, <span class=Rarity_C>C</span> <span id='ABL_Summary_C'>" + tmp.Summary.C + "</span>, (残り:<span id='ABL_Summary_BP'>" + q + "</span>BP / <span id='ABL_Summary_capacity'>" + r + "</span>枠)");
+        j$("#AutoBushodasSummary").html("<span class=Rarity_UR>UR</span> <span id='ABL_Summary_UR'>" + tmp.Summary.UR + "</span>, <span class=Rarity_SR>SR</span> <span id='ABL_Summary_SR'>" + tmp.Summary.SR + "</span>, <span class=Rarity_R>R</span> <span id='ABL_Summary_R'>" + tmp.Summary.R + "</span>, <span class=Rarity_UC>UC</span> <span id='ABL_Summary_UC'>" + tmp.Summary.UC + "</span>, <span class=Rarity_C>C</span> <span id='ABL_Summary_C'>" + tmp.Summary.C + "</span>, (残り:<span id='ABL_Summary_BP'>" + q + "</span>BP / <span id='ABL_Summary_capacity'>" + r + "</span>枠)&nbsp;<a href='/busyodas/busyodas_history.php'>ブショーダス履歴</a>");
         j$("#notice_msg").css({
             "width": "680px",
             "margin-bottom": "20px"
@@ -1264,8 +1263,8 @@ function AutoBushodas(o, p, q, tmp) {
         j$("#AutoBushodasSummary span#ABL_Summary_C").text(tmp.Summary.C);
         // j$("#AutoBushodasSummary span#ABL_Summary_BP").text(o - m);
         // j$("#AutoBushodasSummary span#ABL_Summary_capacity").text(p - n);
-        j$("#AutoBushodasSummary span#ABL_Summary_BP").text(leftBP);
-        j$("#AutoBushodasSummary span#ABL_Summary_capacity").text(leftSpace + 1 - n);
+        j$("#AutoBushodasSummary span#ABL_Summary_BP").text(leftBP + (100 - m));
+        j$("#AutoBushodasSummary span#ABL_Summary_capacity").text(leftSpace + (1 - n));
         GM_setValue(KEY + "PrevSummary", JSON.stringify(tmp.Summary));
         setTimeout(function () {
             AutoBushodas(o - m, p - n, k, tmp)
