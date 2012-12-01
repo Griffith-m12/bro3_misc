@@ -1,4 +1,4 @@
-﻿// ==UserScript==
+// ==UserScript==
 // @name           bro3_misc
 // @namespace      Miscellaneous Tool
 // @include        http://*.3gokushi.jp/facility/castle_send_troop.php*
