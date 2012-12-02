@@ -16,14 +16,18 @@
 // @include        http://*.3gokushi.jp/alliance/alliance_log.php*
 // @include        http://*.3gokushi.jp/message/inbox.php*
 // @include        http://*.3gokushi.jp/union/lvup.php*
+
 // @include        http://*.sangokushi.in.th/card/trade.php*
 // @include        http://*.sangokushi.in.th/card/busyobook_picture.php*
 // @include        http://*.sangokushi.in.th/busyodas/b3kuji.php*
 // @include        http://*.sangokushi.in.th/busyodas/busyodas.php*
+// @include        http://*.sangokushi.in.th/card/status_info.php*
+
 // @include        http://*.bbsr-maql.jp/card/trade.php*
 // @include        http://*.bbsr-maql.jp/card/busyobook_picture.php*
 // @include        http://*.bbsr-maql.jp/busyodas/b3kuji.php*
 // @include        http://*.bbsr-maql.jp/busyodas/busyodas.php*
+
 // @description    雑多な改善(同盟ログ検索機能, トレード, 半自動チュートリアル, 自動ブショーダス(自動削除付), 自動ヨロズダス, 武将図鑑未取得カードのトレードリンク, トレード関連書簡自動開封削除, クエスト, 出兵予約時刻) by いかりや長介@ドリフ
 // @require        http://code.jquery.com/jquery.min.js
 // @version        0.4.6.a3
@@ -726,15 +730,15 @@ try{
         var p;
         var q;
         if(j$("li.first_bpbtn span").length != 0){
-          q = parseInt(j$("li.first_bpbtn span").text());
+          q = parseInt(j$("li.first_bpbtn span:first").text());
         } else {
           q = j$("img[src*='_bp.']").parent().text().replace(/\xA0| |\t/g,'').split("\n")[1];
         }
         var r = j$("div.sysMes strong");
         if(r.length == 5){
-          r = j$("div.sysMes strong").get(2).textContent;
+          r = r.get(2).textContent;
         } else if(r.length == 8) {
-          r = j$("div.sysMes strong").get(3).textContent;
+          r = r.get(3).textContent;
         }
         r = parseInt(r);
         if(j$("#busyodasTabContent:has(img[src*='hd_lite.jpg']) table").length != 0) {
@@ -1141,16 +1145,22 @@ function AutoBushodas(o, p, q, tmp) {
         }
         var leftBP = 0;
         var leftSpace = 0;
-        with(j$("div.sysMes2:last strong")) {
-          if(length == 5){
-            leftBP = get(0).textContent;
-            leftSpace = get(2).textContent;
-          } else if(length == 8) {
-            leftSpace = get(3).textContent;
-          }
-          leftBP = parseInt(leftBP);
-          leftSpace = parseInt(leftSpace);
+        var elms = j$("div.sysMes2:last strong");
+        if(elms.length != 5 && elms.length !=8 && elms.length !=9) {
+          elms = j$("div.sysMes:last strong");
         }
+        if(elms.length == 5){
+          leftBP = elms.get(0).textContent;
+          leftSpace = elms.get(2).textContent;
+        } else if(elms.length == 8) {
+          leftSpace = elms.get(3).textContent;
+        } else if(elms.length == 9) {
+          leftBP = elms.get(0).textContent;
+          leftSpace = elms.get(4).textContent;
+        }
+
+        leftBP = parseInt(leftBP);
+        leftSpace = parseInt(leftSpace);
         var a = '';
         if(j$("a[href*=BusyodasRetry]").length != 0){
           j$("a[href*=BusyodasRetry]").attr("href").match(/\'(\d+)\'/);
@@ -1280,7 +1290,8 @@ function AutoYorozudas(b) {
     if (b == 0) {
         setTimeout(function () {
             // location.href = "http://" + HOST + "/busyodas/b3kuji.php"
-            location.reload(true);
+            location.href = location.pathname;
+            // location.reload(false);
         }, 1000);
         return
     }
