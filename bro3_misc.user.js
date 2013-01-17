@@ -17,12 +17,15 @@
 // @include        http://*.3gokushi.jp/message/inbox.php*
 // @include        http://*.3gokushi.jp/union/lvup.php*
 
+// @include        http://*.sangokushi.in.th/card/deck.php*
 // @include        http://*.sangokushi.in.th/card/trade.php*
 // @include        http://*.sangokushi.in.th/card/busyobook_picture.php*
 // @include        http://*.sangokushi.in.th/busyodas/b3kuji.php*
 // @include        http://*.sangokushi.in.th/busyodas/busyodas.php*
 // @include        http://*.sangokushi.in.th/card/status_info.php*
 
+// @include        http://*.bbsr-maql.jp/quest/*
+// @include        http://*.bbsr-maql.jp/card/deck.php*
 // @include        http://*.bbsr-maql.jp/card/trade.php*
 // @include        http://*.bbsr-maql.jp/card/busyobook_picture.php*
 // @include        http://*.bbsr-maql.jp/busyodas/b3kuji.php*
@@ -33,6 +36,7 @@
 // @version        0.4.6.a3
 // ==/UserScript==
 
+var VERSION_KEY = "b3tMisc";
 var logtitle = 'bro3_misc';
 
 if(typeof GM_getMetadata != 'undefined') {
@@ -403,6 +407,19 @@ try{
         }
     }
     if (location.pathname == "/quest/" || location.pathname == "/quest/index.php") {
+        if(location.search.length != 0){
+          var a = location.search;
+          var qry = {};
+          a.split(/(?:^\?|&)([^=]+=[^&]*)/g).map(function(e){
+            var r = e.split("=");
+            if(r.length==2){
+              if(r[0].length != 0) {
+                qry[r[0]] = r[1];
+              }
+            };
+          });
+          j$("form[name='questForm']:first input[name='p']").val(qry.p);
+        }
         j$("td.questName").attr("width", 203);
         var l = {};
         l["ともだちを招待しよう"] = "CP 150";
@@ -554,7 +571,17 @@ try{
                 }
                 j$(this).after("<br />" + a)
             }
-        })
+        });
+        j$("a[href^='javascript:takeQuest(']").each(function() {
+          var qid = j$(this).attr("href").match(/\((\d+)\)/)[1];
+          console.log("takeQuest:" + qid);
+          if(qid == 254 || qid == 255 || qid == 256) {
+            j$(this).attr("onclick", "");
+          };
+        });
+    }
+    if (location.pathname == "/quest/" || location.pathname == "/quest/index.php") {
+        j$("#questB3_table").on("click", "td", function(){debug_log(j$(this).text());});
     }
     if (location.pathname == "/quest/index.php") {
         if (j$("input[name='disp_id']").val() == "166") {
@@ -658,7 +685,19 @@ try{
     if (location.pathname == "/card/deck.php") {
         debug_log('カード一括破棄ボタンを100枚版デフォルト化');
         with(j$("img[src*='btn_delete.']").parent()) {
-          attr('href', attr('href') + '?sz=100')
+          var url = attr('href');
+          var search, hash;
+          [url, hash] = url.split("#");
+          [url, search] = url.split("?");
+          if(search && search.length > 0) {
+            url += "?" + search + "&sz=100";
+          } else {
+            url += "?sz=100";
+          }
+          if(hash && hash.length > 0) {
+            url += "#" + hash;
+          }
+          attr('href', url);
         }
         // j$("img[src*='btn_delete.']").parent().attr('href', j$("img[src*='btn_delete.']").parent().attr('href') + '&sz=100')
     }
@@ -735,7 +774,9 @@ try{
           q = j$("img[src*='_bp.']").parent().text().replace(/\xA0| |\t/g,'').split("\n")[1];
         }
         var r = j$("div.sysMes strong");
-        if(r.length == 5){
+        if(r.length == 3){
+          r = r.get(0).textContent;
+        } else if(r.length == 5){
           r = r.get(2).textContent;
         } else if(r.length == 8) {
           r = r.get(3).textContent;
@@ -752,7 +793,12 @@ try{
         j$("#AutoBushodasLite").append("<div id=AutoBushodasSummary>");
         j$("#AutoBushodasLite").append("<div id=CardInfo>");
         j$("#AutoBushodasControls").append("<div id=notice_msg>※自動破棄を有効にしても<span class=Rarity_UR>UR</span>, <span class=Rarity_SR>SR</span>, <span class=Rarity_R>R</span>及び優良<span class=Rarity_UC>UC</span>(コスト3/自動スキル/劉備/孫権/諸葛亮/徐庶/水鏡)は破棄対象外</div>");　//ac1
-        j$("#AutoBushodasControls").append("<div id=first_line_wrap><div id=delete_enabler title=R以上及び優良UC(コスト3/自動スキル/劉備/孫権/諸葛亮/徐庶/水鏡)を除外><input type=checkbox id=auto_delete>自動破棄を有効にする</div><div id=save_btn><input type=button id=save_settings value=設定保存></div><div id=draw_btn><input type=button id=AutoDrawBushodas value=自動ブショーダス></div></div>");//ac1
+        j$("#AutoBushodasControls").append("<div id=first_line_wrap>");
+        j$("#AutoBushodasControls").append("<div id=delete_enabler title=R以上及び優良UC(コスト3/自動スキル/劉備/孫権/諸葛亮/徐庶/水鏡)を除外><input type=checkbox id=auto_delete>自動破棄を有効にする</div>");
+        j$("#AutoBushodasControls").append("<div id=save_btn><input type=button id=save_settings value=設定保存></div>");
+        j$("#AutoBushodasControls").append("<span><a href=\"/card/allcard_delete.php?sz=100\" title=\"武将カード一括破棄\">武将カード一括破棄ページ</a></span>");
+        j$("#AutoBushodasControls").append("<div id=draw_btn><input type=button id=AutoDrawBushodas value=自動ブショーダス></div>");
+        j$("#AutoBushodasControls").append("</div>"); //ac1
         j$("#AutoBushodasControls").append("<div class=except_list>破棄除外(スキル付与素材)</div>");
         j$("#AutoBushodasControls").append("<ul>");
         j$("#AutoBushodasControls").append("<li class=keep_skill title=騎兵強行スキルを除外><input type=checkbox id=except_hero>一騎当千</li>");
@@ -768,10 +814,12 @@ try{
         j$("#AutoBushodasControls").append("<li class=keep_skill title=知力15以上を除外><input type=checkbox id=except_intelli_15>知力15以上</li>");
         j$("#AutoBushodasControls").append("<li class=keep_skill title=コスト2.5 UCを除外><input type=checkbox id=except_cost_25_UC>コスト2.5 <span class=Rarity_UC>UC</span></li>");
         j$("#AutoBushodasControls").append("<li class=keep_skill title=コスト2.5 UC/Cを除外><input type=checkbox id=except_cost_25_C>コスト2.5 <span class=Rarity_UC>UC</span><span class=Rarity_C>/C</span></li>");
-        j$("#AutoBushodasControls").append("<li class=keep_skill title=C以外全部除外><input type=checkbox id=except_above_C><span class=Rarity_C>C</span>以外全部除外</li>");
+        j$("#AutoBushodasControls").append("<li class=keep_skill title=全UC除外><input type=checkbox id=except_above_C>全<span class=Rarity_UC>UC</span></li>");
         j$("#AutoBushodasControls").append("</ul>");
         j$("#AutoBushodasControls").append("<div class=except_list>破棄除外(ホワイトリスト) [カードIDを半角かつカンマ区切りで入力]</div>");
         j$("#AutoBushodasControls").append("<div style=clear:both><input type=text id=white_lists size=78></div>");
+        j$("#AutoBushodasControls").append("<div class=except_list>破棄除外スキル [スキル名を半角かつカンマ区切りで入力]</div>");
+        j$("#AutoBushodasControls").append("<div style=clear:both><input type=text id=white_skills size=78></div>");
         tmp.Summary = JSON.parse(GM_getValue(KEY + "PrevSummary", JSON.stringify(tmp.Summary)));
         if(!tmp.Summary.UR && !tmp.Summary.SR && !tmp.Summary.R && !tmp.Summary.UC && !tmp.Summary.C && !tmp.Summary.other) { j$("#AutoBushodasSummary").hide(); }
         GM_deleteValue(KEY + "PrevSummary");
@@ -784,7 +832,7 @@ try{
             "width": "680px"
         });
         j$("#delete_enabler").css({
-            "width": "250px",
+            "width": "200px",
             "float": "left"
         });
         j$("#save_btn").css({
@@ -792,8 +840,8 @@ try{
             "float": "left"
         });
         j$("#draw_btn").css({
-            "width": "300px",
-            "float": "left",
+            "width": "160px",
+            "float": "right",
             "text-align": "right"
         });
         j$("#AutoBushodasLite").css({
@@ -884,11 +932,16 @@ try{
         p = GM_getValue(KEY + "Keep_Above_C", false);
         j$("#except_above_C").attr("checked", p);
         p = GM_getValue(KEY + "White_Lists", "");
+        p = p.split(/[, ]+/).sort(function(a,b) { return (a < b)?-1:(a > b)?1:0 }).join(",");
         j$("#white_lists").val(p);
+        p = GM_getValue(KEY + "White_Skills", "");
+        p = p.split(/[, ]+/).sort(function(a,b) { return (a < b)?-1:(a > b)?1:0 }).join(",");
+        j$("#white_skills").val(p);
         j$("input[type='checkbox']:checked").parent().css("color", "orangered");
         j$("#save_settings").bind('click', function () {
             GM_setValue(KEY + "AutoDelete", j$("#auto_delete").attr("checked")||false);
             GM_setValue(KEY + "White_Lists", j$("#white_lists").attr("value"));
+            GM_setValue(KEY + "White_Skills", j$("#white_skills").attr("value"));
             GM_setValue(KEY + "Keep_Hero", j$("#except_hero").attr("checked")||false);
             GM_setValue(KEY + "Keep_Spear", j$("#except_spear").attr("checked")||false);
             GM_setValue(KEY + "Keep_Cavalry", j$("#except_cavalry").attr("checked")||false);
@@ -1095,15 +1148,24 @@ function AutoBid(b) {
     }
 }
 function AutoBushodas(o, p, q, tmp) {
-    debug_log('AutoBushodas:Enter:' + JSON.stringify({o:o,p:p,q:q}));
-    j$(document.body).append("<div id=AjaxTempDOM>");
-    j$("#AjaxTempDOM").hide();
+    // o: Current BP
+    // p: Card space
+    // q: (Not zero):Delete request cardID
+    // tmp:
+    debug_log('AutoBushodas:Enter:' + j$("div#AjaxTempDOM").length + JSON.stringify({o:o,p:p,q:q, tmp:tmp}));
+    if(j$("div#AjaxTempDOM").length == 0){
+      j$(document.body).append("<div id=AjaxTempDOM>");
+    }
+    j$("div#AjaxTempDOM").empty();
+    j$("div#AjaxTempDOM").hide();
+
     var r;
     if (o / 100 >= p) {
         r = p
     } else {
         r = parseInt(o / 100)
     }
+
     if(j$("input.commentSend").length != 0){
       j$("input.commentSend").attr("onClick").split(",").pop().match(/\'([a-z0-9]+)\'/);
     } else if(j$("#commentsendbtn").length != 0){
@@ -1112,6 +1174,7 @@ function AutoBushodas(o, p, q, tmp) {
       return false;
     }
     var s = RegExp.$1;
+
     if (r == 0) {
         if (q != 0) {
             var t = {};
@@ -1133,12 +1196,29 @@ function AutoBushodas(o, p, q, tmp) {
     }
     var t = {};
     var u = Math.floor(Math.random() * 200 + 500);
-    t['got_type'] = "0";
-    t['send'] = "send";
-    t['ssid'] = s;
-    t['csrf_token'] = s;
-    t['del_card_id'] = q;
-    var callbackBushodas = function () {
+    if(j$("input[name='continuty']").length == 0){
+      t['got_type'] = "0";
+      t['send'] = "send";
+      t['ssid'] = s;
+      t['csrf_token'] = s;
+      t['del_card_id'] = q;
+    } else {
+      t['ssid'] = s;
+      t['send'] = "send";
+      t['tab'] = "normal";
+      t['got_type'] = "0";
+      t['continuty'] = "";
+      if(q!=0) {
+        t['delete[' + q + ']'] = q;
+        t['label[' + q + ']'] = "";
+        t['mode'] = "label";
+        t['card'] = q;
+      }
+    }
+    debug_log("AutoBushodas:load parameters:" + JSON.stringify(t));
+
+    var callbackBushodas = function (responceText, event, XMLHttpRequest) {
+        debug_log("callbackBushodas:" + JSON.stringify({event:event, XMLHttpRequest:XMLHttpRequest.statusText}));
         if(j$('div.cardover-infomation').length != 0){
           j$("#CardInfo").html("<span id=result_msg>" + '武将カード所持上限の超過' + "</span>");
           return false;
@@ -1152,6 +1232,9 @@ function AutoBushodas(o, p, q, tmp) {
         if(elms.length == 5){
           leftBP = elms.get(0).textContent;
           leftSpace = elms.get(2).textContent;
+        } else if(elms.length == 6) {   // Thai?
+          leftBP = elms.get(0).textContent;
+          leftSpace = elms.get(4).textContent;
         } else if(elms.length == 8) {
           leftSpace = elms.get(3).textContent;
         } else if(elms.length == 9) {
@@ -1170,30 +1253,35 @@ function AutoBushodas(o, p, q, tmp) {
         } else if(j$("a[onclick*='BusyodasRetry']").length != 0) {
           j$("a[onclick*='BusyodasRetry']").attr('onclick').split(",").pop().match(/\'([a-z0-9]+)\'/);
           a = RegExp.$1;
+        } else if(j$("input.delete:last").length != 0) {
+          a = j$("input.delete:last").val();
         } else {
           return false;
         }
         debug_log('AjaxTempDOM:' + a);
-        var b = j$("span.cardno").text() || j$("span.gear_cardno").text();
-        var c = j$("span[class*='rarerity']").text();
+        var b = j$("span.cardno:first").text() || j$("span.gear_cardno:first").text();
+        var c = j$("span[class*='rarerity']:first").text();
         if(!c){
           j$("div.card[class*='rarerity_']").attr('class').match(/_([^_ ]+)(?:$|\s)/)
           c = RegExp.$1.toUpperCase();
         }
         // <div class="clearfix cutin_bg" id="cutin_bg_r" onclick="window.location='./busyodas_result.php?card=579736&got_type=0'">
-        var d = j$("span.name").text();
+        var d = j$("span.name:first").text();
         if(!d || d.length == 0){
-          d = j$("span.name1").text();
+          d = j$("span.name1:first").text();
            if(!d || d.length == 0){
-             d = j$("span.gear_name1").text();
+             d = j$("span.gear_name1:first").text();
           }
         }
         var e = parseFloat(j$("span.cost").text());
         var f = parseFloat(j$("span.status_int").text());
-        var g = new Boolean(j$("span.skillName1.red").length);
-
-        j$("span[class*='skillName1']").text().match(/:(.+)LV/);
-        var h = RegExp.$1;
+        var g = false;
+        var h = '';
+        if(j$("span[class*='skillName1']").text().length != 0) {
+          g = new Boolean(j$("span.skillName1.red").length);
+          j$("span[class*='skillName1']").text().match(/:(.+)LV/);
+          h = (!RegExp.$0 && RegExp.$1) || "";
+        }
         var j = " が当たりました!";
         var k = "0";
         var m = 0;
@@ -1206,13 +1294,34 @@ function AutoBushodas(o, p, q, tmp) {
                 k = "0";
                 j = " が当たりました!"
             }
-            if ((GM_getValue(KEY + "Keep_Hero", false) && h == "騎兵強行") || (GM_getValue(KEY + "Keep_Spear", false) && h == "槍兵突撃")|| (GM_getValue(KEY + "Keep_Spear", false) && h == "槍兵強行") || (GM_getValue(KEY + "Keep_Cavalry", false) && h == "騎兵突撃") || (GM_getValue(KEY + "Keep_Cavalry", false) && h == "騎兵の強撃") || (GM_getValue(KEY + "Keep_Bow", false) && h == "弓兵突撃") || (GM_getValue(KEY + "Keep_Bow", false) && h == "弓兵の強撃") || (GM_getValue(KEY + "Keep_Ram", false) && h == "兵器の強撃") || (GM_getValue(KEY + "Keep_Courage", false) && h == "鉄壁") || (GM_getValue(KEY + "Keep_Thousand_Miles", false) && h == "急速援護") || (GM_getValue(KEY + "Keep_Intelligence", false) && f >= 15.0) || (GM_getValue(KEY + "Keep_Cost_C", false) && e >= 2.5) || (GM_getValue(KEY + "Keep_Cost_UC", false) && e >= 2.5 && c == "UC")  || (GM_getValue(KEY + "Keep_Above_C", false) && c != "C") || (GM_getValue(KEY + "Keep_Spear", false) && h == "槍兵の強撃")) {
+            if ((GM_getValue(KEY + "Keep_Hero", false) && h == "騎兵強行")
+            || (GM_getValue(KEY + "Keep_Spear", false) && h == "槍兵突撃")
+            || (GM_getValue(KEY + "Keep_Spear", false) && h == "槍兵強行")
+            || (GM_getValue(KEY + "Keep_Cavalry", false) && h == "騎兵突撃")
+            || (GM_getValue(KEY + "Keep_Cavalry", false) && h == "騎兵の強撃")
+            || (GM_getValue(KEY + "Keep_Bow", false) && h == "弓兵突撃")
+            || (GM_getValue(KEY + "Keep_Bow", false) && h == "弓兵の強撃")
+            || (GM_getValue(KEY + "Keep_Ram", false) && h == "兵器の強撃")
+            || (GM_getValue(KEY + "Keep_Courage", false) && h == "鉄壁")
+            || (GM_getValue(KEY + "Keep_Thousand_Miles", false) && h == "急速援護")
+            || (GM_getValue(KEY + "Keep_Intelligence", false) && f >= 15.0)
+            || (GM_getValue(KEY + "Keep_Cost_C", false) && e >= 2.5)
+            || (GM_getValue(KEY + "Keep_Cost_UC", false) && e >= 2.5 && c == "UC")
+            || (GM_getValue(KEY + "Keep_Above_C", false) && c != "C")
+            || (GM_getValue(KEY + "Keep_Spear", false) && h == "槍兵の強撃")) {
                 k = "0";
                 j = " が当たりました!"
             }
             var l = GM_getValue(KEY + "White_Lists", "").trim().split(",");
             for (var i = 0; i < l.length; i++) {
                 if (l[i].trim() == b) {
+                    k = "0";
+                    j = " が当たりました!"
+                }
+            }
+            var l = GM_getValue(KEY + "White_Skills", "").trim().split(",");
+            for (var i = 0; i < l.length; i++) {
+                if (l[i].trim().length && 0 <=  h.indexOf(l[i].trim())) {
                     k = "0";
                     j = " が当たりました!"
                 }
@@ -1414,4 +1523,67 @@ function addFigure(a) {
     var b = new String(a).replace(/,/g, "");
     while (b != (b = b.replace(/^(-?\d+)(\d{3})/, "$1,$2")));
     return b
+}
+
+//--------------//
+// データロード //
+//--------------//
+function loadExecFlag(hostname, key) {
+	var datakey = new String();
+	datakey = hostname + VERSION_KEY + key;
+
+	var ret = new String();
+	var src = CookieRead(datakey);
+	if (src == "") return ret;
+
+	return src;
+}
+
+//--------------//
+// データセーブ //
+//--------------//
+function saveExecFlag(hostname, key, data) {
+
+	var datakey = new String();
+	datakey = hostname + VERSION_KEY + key;
+
+	CookieWrite(datakey, data, 30);
+}
+
+//----------------------//
+// クッキーへの書き込み //
+//----------------------//
+function CookieWrite(kword, kdata, kday)
+{
+	if(!navigator.cookieEnabled){    // クッキーが利用可能かどうか
+		alert("クッキーへの書き込みができません");
+		return;
+	}
+
+	sday = new Date();
+	sday.setTime(sday.getTime() + (kday * 1000 * 60 * 60 * 24));
+	s2day = sday.toGMTString();
+	document.cookie = kword + "=" + escape(kdata) + ";expires=" + s2day;
+}
+
+//----------------------//
+// クッキーから読み込み //
+//----------------------//
+function CookieRead(kword)
+{
+	if(typeof(kword) == "undefined"){	// キーワードなし
+		return "";	// 何もしないで戻る
+	}
+
+	kword = kword + "=";
+	kdata = "";
+	scookie = document.cookie + ";";	// クッキー情報を読み込む
+	start = scookie.indexOf(kword);		// キーワードを検索
+	if (start != -1){
+		// キーワードと一致するものあり
+		end = scookie.indexOf(";", start);	// 情報の末尾位置を検索
+		kdata = unescape(scookie.substring(start + kword.length, end));	// データ取り出し
+	}
+
+	return kdata;
 }
