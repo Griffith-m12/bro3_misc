@@ -1177,6 +1177,7 @@ function AutoBushodas(o, p, q, tmp) {
 
     if (r == 0) {
         if (q != 0) {
+            // BP不足状態でのカード削除
             var t = {};
             t['card_id[' + q + ']'] = "1";
             t['p'] = "1";
@@ -1194,35 +1195,45 @@ function AutoBushodas(o, p, q, tmp) {
             return
         }
     }
+
     var t = {};
     var u = Math.floor(Math.random() * 200 + 500);
     if(j$("input[name='continuty']").length == 0){
-      t['got_type'] = "0";
       t['send'] = "send";
       t['ssid'] = s;
+      t['got_type'] = "0";
       t['csrf_token'] = s;
       t['del_card_id'] = q;
+      if(!!q && q != 0) {
+        debug_log("AutoBushodas:DrawWithDelete:" + q);
+        t['delete[' + q + ']'] = q;
+        t['label[' + q + ']'] = "";
+        t['mode'] = "label";
+        t['card'] = q;
+      }
     } else {
       t['ssid'] = s;
       t['send'] = "send";
       t['tab'] = "normal";
       t['got_type'] = "0";
       t['continuty'] = "";
-      if(q!=0) {
+      if(!!q && q != 0) {
+        debug_log("AutoBushodas:DrawWithDelete:" + q);
         t['delete[' + q + ']'] = q;
         t['label[' + q + ']'] = "";
         t['mode'] = "label";
         t['card'] = q;
       }
     }
+
     debug_log("AutoBushodas:load parameters:" + JSON.stringify(t));
 
     var callbackBushodas = function (responceText, event, XMLHttpRequest) {
         debug_log("callbackBushodas:" + JSON.stringify({event:event, XMLHttpRequest:XMLHttpRequest.statusText}));
-        if(j$('div.cardover-infomation').length != 0){
-          j$("#CardInfo").html("<span id=result_msg>" + '武将カード所持上限の超過' + "</span>");
-          return false;
-        }
+        //if(j$('div.cardover-infomation').length != 0){
+        //  j$("#CardInfo").html("<span id=result_msg>" + '武将カード所持上限の超過' + "</span>");
+        //  return false;
+        //}
         var leftBP = 0;
         var leftSpace = 0;
         var elms = j$("div.sysMes2:last strong");
@@ -1244,21 +1255,25 @@ function AutoBushodas(o, p, q, tmp) {
 
         leftBP = parseInt(leftBP);
         leftSpace = parseInt(leftSpace);
+
         var a = '';
         if(j$("a[href*=BusyodasRetry]").length != 0){
           j$("a[href*=BusyodasRetry]").attr("href").match(/\'(\d+)\'/);
           a = RegExp.$1;
-        } else if(j$("form[name='label1'] input[name='card']").length != 0){
-          a = j$("form[name='label1'] input[name='card']").first().val();
+        } else if(j$("input[name='card']").length != 0){
+          a = j$("input[name='card']").first().val();
         } else if(j$("a[onclick*='BusyodasRetry']").length != 0) {
           j$("a[onclick*='BusyodasRetry']").attr('onclick').split(",").pop().match(/\'([a-z0-9]+)\'/);
           a = RegExp.$1;
         } else if(j$("input.delete:last").length != 0) {
           a = j$("input.delete:last").val();
         } else {
+          debug_log('AutoBushodas:Quit:No cardID.');
+          j$("#CardInfo").html("<span id=result_msg>" +  j$("span.notice").text() + "</span>");
           return false;
         }
-        debug_log('AjaxTempDOM:' + a);
+
+        debug_log('CardID:' + a);
         var b = j$("span.cardno:first").text() || j$("span.gear_cardno:first").text();
         var c = j$("span[class*='rarerity']:first").text();
         if(!c){
