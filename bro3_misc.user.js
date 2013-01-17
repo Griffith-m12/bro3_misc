@@ -24,16 +24,11 @@
 // @include        http://*.sangokushi.in.th/busyodas/busyodas.php*
 // @include        http://*.sangokushi.in.th/card/status_info.php*
 
-// @include        http://*.bbsr-maql.jp/quest/*
-// @include        http://*.bbsr-maql.jp/card/deck.php*
-// @include        http://*.bbsr-maql.jp/card/trade.php*
-// @include        http://*.bbsr-maql.jp/card/busyobook_picture.php*
-// @include        http://*.bbsr-maql.jp/busyodas/b3kuji.php*
-// @include        http://*.bbsr-maql.jp/busyodas/busyodas.php*
-
 // @description    雑多な改善(同盟ログ検索機能, トレード, 半自動チュートリアル, 自動ブショーダス(自動削除付), 自動ヨロズダス, 武将図鑑未取得カードのトレードリンク, トレード関連書簡自動開封削除, クエスト, 出兵予約時刻) by いかりや長介@ドリフ
 // @require        http://code.jquery.com/jquery.min.js
-// @version        0.4.6.a3
+// @updateURL      https://github.com/Griffith-m12/bro3_misc/raw/Griffith/bro3_misc.meta.js
+// @downloadURL    https://github.com/Griffith-m12/bro3_misc/raw/Griffith/bro3_misc.user.js
+// @version        0.4.6g201301180013
 // ==/UserScript==
 
 var VERSION_KEY = "b3tMisc";
@@ -907,7 +902,8 @@ try{
         j$("#auto_delete").attr("checked", p);
         if (p == false) {
             j$("input[type='checkbox'][id*='except_']").attr("disabled", "disabled");
-            j$("#white_lists").attr("disabled", "disabled")
+            j$("#white_lists").attr("disabled", "disabled");
+            j$("#white_skills").attr("disabled", "disabled");
         }
         p = GM_getValue(KEY + "Keep_Hero", false);
         j$("#except_hero").attr("checked", p);
@@ -959,11 +955,13 @@ try{
             if (j$(this).attr('checked') == false) {
                 j$(this).parent().css("color", "black");
                 j$("input[type='checkbox'][id*='except_']").attr("disabled", "disabled");
-                j$("#white_lists").attr("disabled", "disabled")
+                j$("#white_lists").attr("disabled", "disabled");
+                j$("#white_skills").attr("disabled", "disabled");
             } else {
                 j$(this).parent().css("color", "orangered");
                 j$("input[type='checkbox'][id*='except_']").removeAttr("disabled");
-                j$("#white_lists").removeAttr("disabled")
+                j$("#white_lists").removeAttr("disabled");
+                j$("#white_skills").removeAttr("disabled");
             }
         });
         j$("input[type='checkbox'][id*='except_']").bind('click', function () {
